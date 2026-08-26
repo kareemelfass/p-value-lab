@@ -1,5 +1,9 @@
 # P-value Lab
 
+## 🌐 [Open the live P-value Lab](https://kareemelfass.github.io/p-value-lab/)
+
+**Interactive website:** https://kareemelfass.github.io/p-value-lab/
+
 An interactive educational simulation for beginner and intermediate researchers exploring how p-values respond to:
 
 - underlying effect size
@@ -21,6 +25,8 @@ Open `index.html` in a modern browser. No dependencies or build step are require
 
 ## GitHub Pages
 
-This repository is designed to be served directly as a static GitHub Pages site from the repository root.
+The live version is available here:
+
+**https://kareemelfass.github.io/p-value-lab/**
 
 Created by Kareem Elfass.
