@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Build a Kaplan–Meier Curve</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9dee8;--soft:#f6f8fb;--blue:#315c9a;--blue2:#eaf1fb;--green:#287a5b;--red:#a53d45}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.55}.wrap{max-width:980px;margin:auto;padding:28px 18px 60px}h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 8px}h2{margin:34px 0 12px;font-size:24px}h3{margin:0 0 8px}.lead{font-size:18px;color:var(--muted);max-width:760px}.card{border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0;background:#fff}.soft{background:var(--soft)}.formula{text-align:center;font-size:clamp(18px,4vw,26px);padding:14px;margin:12px 0;background:#fff;border:1px solid var(--line);border-radius:12px}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:18px 0}.flow div{background:var(--soft);padding:12px 8px;border-radius:12px;text-align:center;font-size:14px}.big{font-size:26px;font-weight:750;color:var(--blue)}.simgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.patients{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.p{border:1px solid var(--line);border-radius:10px;text-align:center;padding:8px}.p.active{background:var(--blue2);border-color:var(--blue)}.p.done{opacity:.45}.sym{font-size:20px;font-weight:700}.calc{min-height:165px}.mini{color:var(--muted);font-size:13px}.calcbox{background:var(--soft);padding:13px;border-radius:12px;margin-top:10px}.controls{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:10px;padding:11px 16px;cursor:pointer}button.primary{background:var(--blue);color:#fff;border-color:var(--blue)}button:disabled{opacity:.4;cursor:not-allowed}.chartbox{overflow-x:auto}.chartbox svg{width:100%;min-width:580px;height:auto}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:700px}th,td{padding:9px;border-bottom:1px solid var(--line);text-align:center}th:first-child,td:first-child{text-align:left}tr.current{background:var(--blue2)}tr.future{color:#a5adba}.lesson{font-size:18px}.badge{display:inline-block;background:var(--blue2);color:var(--blue);padding:4px 10px;border-radius:999px;font-weight:650}.takeaway{border-left:4px solid var(--blue);padding-left:14px}.refs{font-size:14px;color:var(--muted)}@media(max-width:700px){.simgrid{grid-template-columns:1fr}.flow{grid-template-columns:1fr}.flow div{text-align:left}.patients{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body><main class="wrap">
+<span class="badge">Interactive survival analysis lesson</span>
+<h1>Build a Kaplan–Meier Curve</h1>
+<p class="lead">See where every step of the curve comes from. We will follow 8 patients, calculate survival one time point at a time, and connect each calculation directly to the graph.</p>
+
+<h2>Before we build the curve</h2>
+<div class="card soft lesson"><p>A Kaplan–Meier curve starts at <strong>100% survival</strong>.</p><p>As we follow people over time, an <strong>event</strong> makes us recalculate survival. If someone is <strong>censored</strong>, they leave later calculations, but censoring itself does not make the curve drop.</p><p>The question at every event time is simply:</p><p class="takeaway"><strong>Of the people who were still at risk just before this time, what proportion survived past this event time?</strong></p></div>
+
+<h2>Conditional survival</h2>
+<p>Suppose <strong>8 people are at risk</strong> and <strong>1 has the event</strong>. That means 7 of the 8 survive past this event time.</p>
+<div class="formula"><strong>Conditional survival</strong> = (At risk − Events) ÷ At risk<br><span class="big">(8 − 1) ÷ 8 = 7/8 = 0.875</span></div>
+<p>This is called <strong>conditional</strong> survival because it asks about survival through this step among people who had made it to this time and were still at risk.</p>
+
+<h2>Let's do the first step together</h2>
+<div class="card"><p>At <strong>month 2</strong>, all 8 patients are still at risk and 1 patient has the event.</p><div class="flow"><div><strong>8</strong><br>at risk</div><div>→</div><div><strong>1</strong><br>event</div><div>→</div><div><strong>7/8 = 87.5%</strong><br>survive this step</div></div><p>Before month 2, survival was 100%. So:</p><div class="formula">Survival at month 2 = Previous survival × Conditional survival<br><strong>1.00 × 0.875 = <span class="big">0.875 (87.5%)</span></strong></div><p>Our KM curve therefore makes its first step down: <strong>100% → 87.5%</strong>.</p></div>
+
+<h2>Now build the curve</h2>
+<p>We have done month 2 together. Continue one observation time at a time. Watch the <strong>people → calculation → table → curve</strong> update together.</p>
+<div class="card">
+<div id="instruction" class="lesson"></div>
+<div class="simgrid">
+<div><h3>Who is still at risk?</h3><div id="patients" class="patients"></div></div>
+<div><h3>What happens now?</h3><div id="calc" class="calc"></div></div>
+</div>
+<div class="controls"><button id="prev">← Previous</button><button id="next" class="primary">Next step →</button><button id="restart">Restart</button><span id="progress" class="mini" style="align-self:center"></span></div>
+</div>
+
+<div class="card"><h3>Watch the curve appear</h3><p class="mini">A vertical drop means an event occurred. A short mark on the curve means censoring.</p><div class="chartbox"><svg id="chart" viewBox="0 0 760 330" aria-label="Kaplan Meier curve"></svg></div></div>
+
+<h2>Connect each step to the table</h2>
+<div class="tablewrap card"><table><thead><tr><th>Time</th><th>At risk</th><th>Events</th><th>Censored</th><th>Conditional survival</th><th>KM survival</th></tr></thead><tbody id="rows"></tbody></table></div>
+
+<div class="card soft"><h3>The big idea</h3><p>At each <strong>event time</strong>, calculate the proportion who survived that step, then multiply it by the survival probability you had already accumulated.</p><div class="formula">S(t) = ∏ (1 − dᵢ/nᵢ)</div><p class="mini">nᵢ = number at risk immediately before the event time; dᵢ = number of events at that time.</p><p><strong>Censoring does not cause a drop.</strong> It changes who remains in the risk set for later event times.</p></div>
+
+<h2>References</h2><div class="refs"><p>Kaplan EL, Meier P. Nonparametric estimation from incomplete observations. <em>J Am Stat Assoc.</em> 1958;53(282):457–481.</p><p>Clark TG, Bradburn MJ, Love SB, Altman DG. Survival analysis part I: basic concepts and first analyses. <em>Br J Cancer.</em> 2003;89:232–238.</p></div>
+</main>
+<script>
+const people=[['A',2,'event'],['B',3,'event'],['C',4,'censor'],['D',5,'event'],['E',5,'event'],['F',7,'censor'],['G',8,'event'],['H',10,'censor']];
+const steps=[{t:2,n:8,d:1,c:0,f:.875,S:.875},{t:3,n:7,d:1,c:0,f:6/7,S:.75},{t:4,n:6,d:0,c:1,f:null,S:.75},{t:5,n:5,d:2,c:0,f:.6,S:.45},{t:7,n:3,d:0,c:1,f:null,S:.45},{t:8,n:2,d:1,c:0,f:.5,S:.225},{t:10,n:1,d:0,c:1,f:null,S:.225}];
+let k=0; const $=x=>document.querySelector(x),fmt=x=>(x*100).toFixed(1)+'%';
+function patients(){let s=steps[k];$('#patients').innerHTML=people.map(p=>{let active=p[1]===s.t,done=p[1]<s.t;let sym='●',lab='at risk';if(done||active){sym=p[2]==='event'?'×':'│';lab=p[2]==='event'?'event at '+p[1]:'censored at '+p[1]}return `<div class="p ${active?'active':''} ${done?'done':''}"><strong>${p[0]}</strong><div class="sym">${sym}</div><div class="mini">${lab}</div></div>`}).join('')}
+function calc(){let s=steps[k],prev=k?steps[k-1].S:1;$('#instruction').innerHTML=`<span class="badge">Month ${s.t}</span> &nbsp; ${s.d?`An event${s.d>1?'s':''} occurs. Let's update survival.`:`A patient is censored. What happens to the curve?`}`;if(s.d){let survivors=s.n-s.d;$('#calc').innerHTML=`<div class="calcbox"><strong>${s.n} at risk → ${s.d} event${s.d>1?'s':''} → ${survivors} survive this step</strong><br><br>Conditional survival = ${survivors}/${s.n} = <strong>${fmt(s.f)}</strong><br><br>Overall survival = ${fmt(prev)} × ${fmt(s.f)} = <strong class="big">${fmt(s.S)}</strong></div>`}else{$('#calc').innerHTML=`<div class="calcbox"><strong>1 patient is censored.</strong><p>There is no event, so survival does not fall.</p><strong class="big">Survival stays ${fmt(s.S)}</strong><p class="mini">This patient leaves the risk set for later calculations.</p></div>`}}
+function table(){let rows=steps.map((s,i)=>`<tr class="${i===k?'current':''} ${i>k?'future':''}"><td>${s.t}</td><td>${i<=k?s.n:'?'}</td><td>${i<=k?s.d:'?'}</td><td>${i<=k?s.c:'?'}</td><td>${i<=k?(s.f===null?'—':fmt(s.f)):'?'}</td><td><strong>${i<=k?fmt(s.S):'?'}</strong></td></tr>`).join('');$('#rows').innerHTML=`<tr><td>0</td><td>8</td><td>0</td><td>0</td><td>—</td><td><strong>100.0%</strong></td></tr>`+rows}
+function chart(){const svg=$('#chart'),L=62,T=20,W=740,H=270,x=t=>L+(W-L-20)*t/10,y=s=>T+(H-T)*(1-s);let h=`<line x1="${L}" y1="${T}" x2="${L}" y2="${H}" stroke="#98a2b3"/><line x1="${L}" y1="${H}" x2="${W}" y2="${H}" stroke="#98a2b3"/>`;[0,.25,.5,.75,1].forEach(v=>h+=`<line x1="${L}" y1="${y(v)}" x2="${W}" y2="${y(v)}" stroke="#e5e7eb"/><text x="52" y="${y(v)+4}" text-anchor="end" font-size="12" fill="#667085">${Math.round(v*100)}%</text>`);[0,2,4,6,8,10].forEach(v=>h+=`<text x="${x(v)}" y="292" text-anchor="middle" font-size="12" fill="#667085">${v}</text>`);h+=`<text x="400" y="318" text-anchor="middle" font-size="13" fill="#667085">Time (months)</text>`;let d=`M${x(0)},${y(1)} H${x(2)} V${y(.875)}`;for(let i=1;i<=k;i++){let s=steps[i];d+=` H${x(s.t)}`;if(s.d)d+=` V${y(s.S)}`;}let end=k<steps.length-1?steps[k+1].t:10;d+=` H${x(end)}`;h+=`<path d="${d}" fill="none" stroke="#315c9a" stroke-width="4"/>`;for(let i=0;i<=k;i++){let s=steps[i];if(s.c){let xx=x(s.t),yy=y(s.S);h+=`<line x1="${xx}" y1="${yy-8}" x2="${xx}" y2="${yy+8}" stroke="#287a5b" stroke-width="3"/>`}}svg.innerHTML=h}
+function render(){patients();calc();table();chart();$('#prev').disabled=k===0;$('#next').disabled=k===steps.length-1;$('#next').textContent=k===steps.length-1?'Finished ✓':'Next step →';$('#progress').textContent=`Step ${k+1} of ${steps.length}`}
+$('#next').onclick=()=>{if(k<steps.length-1){k++;render()}};$('#prev').onclick=()=>{if(k>0){k--;render()}};$('#restart').onclick=()=>{k=0;render()};render();
+</script></body></html>
