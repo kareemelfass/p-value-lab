@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KMunicate: See the Information Behind a Kaplan–Meier Curve</title>
+<style>
+:root{--ink:#172033;--muted:#667085;--line:#d9dee8;--soft:#f6f8fb;--blue:#315c9a;--blue2:#eaf1fb;--orange:#b55f22;--orange2:#fdf0e6;--green:#287a5b}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--ink);background:#fff;line-height:1.55}.wrap{max-width:1120px;margin:auto;padding:28px 18px 64px}h1{font-size:clamp(28px,5vw,44px);line-height:1.1;margin:0 0 10px}h2{margin:36px 0 12px;font-size:24px}h3{font-size:18px;margin:0 0 6px}.lead{font-size:18px;color:var(--muted);max-width:820px}.badge{display:inline-block;background:var(--blue2);color:var(--blue);padding:4px 10px;border-radius:999px;font-weight:650}.card{border:1px solid var(--line);border-radius:16px;padding:18px;margin:14px 0;background:#fff}.soft{background:var(--soft)}.compare{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}.controls{display:grid;gap:16px}.control{display:grid;gap:5px}.controlhead{display:flex;justify-content:space-between;gap:8px;font-weight:650}.controlhead output{font-variant-numeric:tabular-nums;color:var(--blue)}input[type=range]{width:100%;accent-color:var(--blue)}.plots{display:grid;grid-template-columns:1fr 1fr;gap:18px}.plot{min-width:0}.plot p{margin:0 0 8px;color:var(--muted);font-size:14px}.chartbox{overflow-x:auto}.chartbox svg{display:block;width:100%;min-width:430px;height:auto}.tablewrap{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:720px}th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}th:first-child,td:first-child{text-align:left}.rowlabel{font-weight:650}.blue{color:var(--blue)}.orange{color:var(--orange)}.takeaway{border-left:4px solid var(--blue);padding-left:14px;font-size:17px}.callout{display:grid;grid-template-columns:1fr 1fr;gap:14px}.callout div{padding:14px;background:var(--soft);border-radius:12px}.mini{font-size:14px;color:var(--muted)}pre{margin:10px 0 0;padding:14px;overflow:auto;border-radius:12px;background:#172033;color:#f5f7fb;font-size:14px;line-height:1.45}@media(max-width:820px){.compare{grid-template-columns:1fr}}@media(max-width:700px){.plots,.callout{grid-template-columns:1fr}.wrap{padding:22px 14px 48px}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<span class="badge">Interactive survival analysis lesson</span>
+<h1>KMunicate: see the information behind a Kaplan–Meier curve</h1>
+<p class="lead">Use the controls to change the same illustrative time-to-event data in both figures. The standard plot shows the estimated curves. The KMunicate format also shows uncertainty and the changing participant status behind the curves.</p>
+
+<h2>Why a curve alone can mislead</h2>
+<div class="card soft">
+<p>A late survival estimate can look stable even when few participants remain under observation. The curve does not, by itself, reveal how many participants are still at risk, how many have experienced the event, how many have been censored, or how uncertain the estimate has become.</p>
+<p class="takeaway"><strong>Read the two figures together:</strong> they show the same data. What differs is the information made visible to the reader.</p>
+</div>
+
+<h2>Compare the two formats</h2>
+<div class="card">
+<div class="compare">
+<section class="controls" aria-label="Illustrative data controls">
+<div class="control"><div class="controlhead"><label for="n">Participants per arm</label><output id="nOut">120</output></div><input id="n" type="range" min="40" max="300" step="20" value="120"></div>
+<div class="control"><div class="controlhead"><label for="hr">Treatment hazard ratio</label><output id="hrOut">0.70</output></div><input id="hr" type="range" min="0.45" max="1.35" step="0.05" value="0.70"></div>
+<div class="control"><div class="controlhead"><label for="censor">Censored by 24 months</label><output id="censorOut">35%</output></div><input id="censor" type="range" min="5" max="75" step="5" value="35"></div>
+<p class="mini">The controls alter an illustrative cohort. They are designed to show what a figure communicates, not to fit a survival model.</p>
+</section>
+
+<section class="plots" aria-label="Kaplan-Meier plot comparison">
+<figure class="plot"><h3>Standard Kaplan–Meier plot</h3><p>Survival curves only.</p><div class="chartbox"><svg id="standard" viewBox="0 0 500 330" role="img" aria-label="Standard Kaplan-Meier plot"></svg></div></figure>
+<figure class="plot"><h3>KMunicate plot</h3><p>Same curves, with 95% confidence intervals.</p><div class="chartbox"><svg id="kmunicate" viewBox="0 0 500 330" role="img" aria-label="KMunicate Kaplan-Meier plot"></svg></div></figure>
+</section>
+</div>
+</div>
+
+<div class="card">
+<h3>KMunicate extended risk table</h3>
+<p class="mini">At each timepoint, the three status rows within each arm sum to the original number randomised.</p>
+<div class="tablewrap"><table aria-label="Extended risk table"><thead id="riskHead"></thead><tbody id="riskBody"></tbody></table></div>
+</div>
+
+<div class="card soft" id="message" aria-live="polite"></div>
+
+<h2>What the KMunicate format adds</h2>
+<div class="callout">
+<div><strong>Confidence intervals</strong><br><span class="mini">The shaded bands quantify uncertainty around the survival estimate. They generally widen as the number at risk declines.</span></div>
+<div><strong>Participant status</strong><br><span class="mini">The extended table separates participants who remain at risk from those with an event and those censored. It makes the information base of late follow-up explicit.</span></div>
+</div>
+
+<h2>Use the format in R</h2>
+<p>The <a href="https://cran.r-project.org/package=KMunicate">KMunicate</a> package produces this reporting format from a <code>survfit</code> object.</p>
+<pre><code>library(survival)
+library(KMunicate)
+
+fit &lt;- survfit(Surv(time, status) ~ treatment, data = dat)
+
+KMunicate(
+  fit = fit,
+  time_scale = c(0, 6, 12, 18, 24)
+)</code></pre>
+
+<h2>Takeaway</h2>
+<p class="takeaway">The KMunicate format does not change the Kaplan–Meier estimate. It changes what the reader can judge: the uncertainty around the curves and the amount of information supporting each part of them.</p>
+
+<h2>References</h2>
+<div class="mini">
+<p>Morris TP, Jarvis CI, Cragg W, et al. Proposals on Kaplan–Meier plots in medical research and a survey of stakeholder views: KMunicate. <em>BMJ Open.</em> 2019;9:e030215. <a href="https://bmjopen.bmj.com/content/9/9/e030215">https://bmjopen.bmj.com/content/9/9/e030215</a></p>
+<p>Gasparini A, Serpa Neto A, Dutey P. <em>KMunicate: KMunicate-Style Kaplan–Meier Plots.</em> R package version 0.2.5. <a href="https://cran.r-project.org/package=KMunicate">https://cran.r-project.org/package=KMunicate</a></p>
+</div>
+</main>
+<script>
+(function(){
+var times=[0,6,12,18,24];
+var nEl=document.getElementById('n'),hrEl=document.getElementById('hr'),cEl=document.getElementById('censor');
+var nOut=document.getElementById('nOut'),hrOut=document.getElementById('hrOut'),cOut=document.getElementById('censorOut');
+var standard=document.getElementById('standard'),kmunicate=document.getElementById('kmunicate');
+var head=document.getElementById('riskHead'),body=document.getElementById('riskBody'),message=document.getElementById('message');
+function fmt(v){return Math.round(v*100)+'%'}
+function inputs(){return {n:+nEl.value,hr:+hrEl.value,censor:+cEl.value/100}}
+function armData(p,modifier){
+  var rows=[{t:0,atRisk:p.n,events:0,censored:0,survival:1,lo:1,hi:1}],atRisk=p.n,cumEvents=0,cumCensor=0,s=1,g=0;
+  var cInterval=1-Math.pow(1-p.censor,0.25);
+  for(var i=1;i<times.length;i++){
+    var eventP=1-Math.exp(-0.018*modifier*6);
+    var events=Math.min(atRisk,Math.max(0,Math.round(atRisk*eventP)));
+    if(atRisk>0&&events===0)events=1;
+    g+=events/(atRisk*Math.max(1,atRisk-events));
+    s=s*(1-events/atRisk);
+    var censored=Math.min(atRisk-events,Math.round((atRisk-events)*cInterval));
+    atRisk-=events+censored;cumEvents+=events;cumCensor+=censored;
+    var se=s*Math.sqrt(g),delta=1.96*se;
+    rows.push({t:times[i],atRisk:atRisk,events:cumEvents,censored:cumCensor,survival:s,lo:Math.max(0,s-delta),hi:Math.min(1,s+delta)});
+  }
+  return rows;
+}
+function path(rows,x,y,key){var d='M'+x(rows[0].t)+','+y(rows[0][key]);for(var i=1;i<rows.length;i++)d+=' H'+x(rows[i].t)+' V'+y(rows[i][key]);return d}
+function band(rows,x,y){var top=path(rows,x,y,'hi'),bottom='';for(var i=rows.length-1;i>=0;i--){bottom+=' L'+x(rows[i].t)+','+y(rows[i].lo);if(i>0)bottom+=' V'+y(rows[i-1].lo)}return top+bottom+' Z'}
+function plot(svg,control,treat,withCI){
+  var W=500,H=330,L=60,R=18,T=22,B=55,x=function(t){return L+(W-L-R)*t/24},y=function(s){return T+(H-T-B)*(1-s)};
+  var h='<title>'+ (withCI?'KMunicate':'Standard') +' Kaplan–Meier plot</title><desc>Illustrative treatment and control survival curves'+(withCI?' with 95 percent confidence intervals.':' without confidence intervals.')+'</desc>';
+  h+='<rect x="'+L+'" y="'+T+'" width="'+(W-L-R)+'" height="'+(H-T-B)+'" fill="none" stroke="#d9dee8"/>';
+  [0,.25,.5,.75,1].forEach(function(v){h+='<line x1="'+L+'" y1="'+y(v)+'" x2="'+(W-R)+'" y2="'+y(v)+'" stroke="#e6eaf0"/><text x="'+(L-9)+'" y="'+(y(v)+4)+'" text-anchor="end" font-size="12" fill="#667085">'+Math.round(v*100)+'%</text>'});
+  times.forEach(function(t){h+='<text x="'+x(t)+'" y="'+(H-33)+'" text-anchor="middle" font-size="12" fill="#667085">'+t+'</text>'});
+  h+='<text x="'+((L+W-R)/2)+'" y="'+(H-10)+'" text-anchor="middle" font-size="13" fill="#667085">Months since randomisation</text><text transform="translate(16 '+((T+H-B)/2)+') rotate(-90)" text-anchor="middle" font-size="13" fill="#667085">Estimated survival</text>';
+  if(withCI){h+='<path d="'+band(control,x,y)+'" fill="#315c9a" opacity=".16"/><path d="'+band(treat,x,y)+'" fill="#b55f22" opacity=".16"/>'}
+  h+='<path d="'+path(control,x,y,'survival')+'" fill="none" stroke="#315c9a" stroke-width="3"/><path d="'+path(treat,x,y,'survival')+'" fill="none" stroke="#b55f22" stroke-width="3" stroke-dasharray="7 5"/>';
+  var cLast=control[control.length-1],tLast=treat[treat.length-1];
+  h+='<text x="'+(W-R)+'" y="'+(y(cLast.survival)-8)+'" text-anchor="end" font-size="12" fill="#315c9a">Control</text><text x="'+(W-R)+'" y="'+(y(tLast.survival)+16)+'" text-anchor="end" font-size="12" fill="#b55f22">Treatment</text>';
+  svg.innerHTML=h;
+}
+function table(control,treat){
+  head.innerHTML='<tr><th>Arm / status</th>'+times.map(function(t){return '<th>'+t+' months</th>'}).join('')+'</tr>';
+  function cells(rows,key){return rows.map(function(r){return '<td>'+r[key]+'</td>'}).join('')}
+  body.innerHTML='<tr><td class="rowlabel blue">● Control: at risk</td>'+cells(control,'atRisk')+'</tr><tr><td>&nbsp;&nbsp;Events</td>'+cells(control,'events')+'</tr><tr><td>&nbsp;&nbsp;Censored</td>'+cells(control,'censored')+'</tr><tr><td class="rowlabel orange">● Treatment: at risk</td>'+cells(treat,'atRisk')+'</tr><tr><td>&nbsp;&nbsp;Events</td>'+cells(treat,'events')+'</tr><tr><td>&nbsp;&nbsp;Censored</td>'+cells(treat,'censored')+'</tr>';
+}
+function render(){
+  var p=inputs();nOut.textContent=p.n;hrOut.textContent=p.hr.toFixed(2);cOut.textContent=Math.round(p.censor*100)+'%';
+  var control=armData(p,1),treat=armData(p,p.hr);plot(standard,control,treat,false);plot(kmunicate,control,treat,true);table(control,treat);
+  var tail=Math.min(control[4].atRisk,treat[4].atRisk);
+  message.innerHTML='<strong>What changes at 24 months?</strong><br>Only '+tail+' participants remain in the smaller arm-specific risk set. The standard plot does not show this. The KMunicate plot makes it visible through wider confidence intervals and the risk table.';
+}
+[nEl,hrEl,cEl].forEach(function(el){el.addEventListener('input',render)});render();
+})();
+</script>
+</body>
+</html>
