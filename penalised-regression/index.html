@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Penalised Regression Learning Lab</title>
+<style>
+:root{--bg:#f6f8fb;--panel:#fff;--ink:#15213a;--muted:#60708f;--line:#dfe6f1;--blue:#2b6cb0;--green:#2f855a;--purple:#805ad5;--orange:#c05621}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{padding:28px 24px 20px;background:linear-gradient(120deg,#edf4ff,#f4efff);border-bottom:1px solid var(--line)}header h1{margin:0 0 6px;font-size:34px}header p{margin:0;color:var(--muted);max-width:1000px;line-height:1.5}
+.app{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 116px)}nav{padding:14px;background:#fff;border-right:1px solid var(--line);position:sticky;top:0;height:calc(100vh - 116px);overflow:auto}
+nav button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:12px 10px;margin:3px 0;border-radius:10px;color:#31415f;font-weight:650;cursor:pointer}nav button:hover{background:#f1f5fb}nav button.active{background:#e8f1ff;color:#164a86}
+main{padding:24px;max-width:1200px;width:100%;margin:auto}.module{display:none}.module.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin:0 0 16px;box-shadow:0 2px 8px rgba(20,40,80,.04)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:14px}.terms{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.term{border:1px solid var(--line);border-radius:10px;padding:12px}.term b{display:block;margin-bottom:5px}h2{margin:0 0 14px;font-size:26px}h3{margin:0 0 10px}p,li{line-height:1.55}.small{font-size:13px;color:var(--muted)}
+.note{background:#f8fbff;border-left:4px solid var(--blue);padding:12px 14px;border-radius:8px}.warn{background:#fff8f0;border-left-color:var(--orange)}.good{background:#f2fbf6;border-left-color:var(--green)}
+.eq{font-family:Georgia,serif;background:#f7f9fc;border:1px solid var(--line);padding:10px 12px;border-radius:10px}.kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}.kpi div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px}.kpi b{display:block;font-size:20px}
+label{font-weight:700;display:block;margin-bottom:6px}input[type=range]{width:100%}select,.action{font:inherit;border:1px solid #cbd6e6;border-radius:9px;padding:9px 11px;background:#fff}.action{cursor:pointer;background:#edf4ff;color:#184f8c;font-weight:700}
+canvas{width:100%;height:330px;border:1px solid var(--line);border-radius:10px;background:#fff}table{width:100%;border-collapse:collapse;font-size:14px}th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:top}th{background:#f5f8fc}
+.quiz{display:block;width:100%;text-align:left;margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}.quiz.correct{border-color:#77b896;background:#eefaf2}.quiz.wrong{border-color:#d68b8b;background:#fff3f3}
+.progress{height:8px;background:#e8edf5;border-radius:999px;overflow:hidden;margin-top:10px}.progress div{height:100%;background:#4c78a8;width:0}
+@media(max-width:900px){.app{grid-template-columns:1fr}nav{position:relative;height:auto;border-right:0;border-bottom:1px solid var(--line);display:flex;overflow:auto}nav button{min-width:190px}.grid2,.controls,.terms{grid-template-columns:1fr}.kpi{grid-template-columns:1fr 1fr}main{padding:14px}}
+</style>
+</head>
+<body>
+<header><h1>Penalised Regression Learning Lab</h1><p>Learn ridge, lasso, and elastic net by changing the penalty yourself. One reproducible simulated dataset is used throughout so that differences come from the penalty, not from changing examples.</p></header>
+<div class="app">
+<nav>
+<button class="active" data-m="m0">1. When to use</button>
+<button data-m="m1">2. Why penalise?</button>
+<button data-m="m2">3. Main terms</button>
+<button data-m="m3">4. Lambda lab</button>
+<button data-m="m4">5. Ridge vs lasso</button>
+<button data-m="m5">6. Elastic net</button>
+<button data-m="m6">7. Coefficient paths</button>
+<button data-m="m7">8. Cross-validation</button>
+<button data-m="m8">9. Correlated-predictor trap</button>
+<button data-m="m9">10. Final challenge</button>
+</nav>
+<main>
+
+<section id="m0" class="module active">
+<h2>1. When to use penalised regression</h2>
+<div class="grid2">
+<div class="card"><h3>Good situations for penalisation</h3><ul>
+<li><b>Prediction is the main goal</b>, rather than estimating one causal effect.</li>
+<li><b>There are many predictors</b>, including <b>p &gt; n</b>, meaning more predictors than observations.</li>
+<li><b>Predictors are correlated</b>, so ordinary regression coefficients may become unstable.</li>
+<li><b>You want shrinkage</b> to reduce overfitting.</li>
+<li><b>You may want variable selection</b>. Lasso and elastic net can set coefficients exactly to zero. Ridge generally cannot.</li>
+</ul></div>
+<div class="card"><h3>Less suitable as a default</h3><div class="note warn"><b>Be careful when the main aim is causal-effect estimation.</b> Prespecified confounders should not be automatically deleted merely because they add little predictive information.</div>
+<p><b>Decision process:</b></p><ol><li>Define the goal: prediction or causal interpretation.</li><li>Decide whether sparsity is desirable.</li><li>Inspect predictor correlation.</li><li>Then tune the penalty using resampling.</li></ol></div>
+</div>
+<div class="card note good"><b>Practical rule:</b> penalised regression is a natural family to consider when the main problem is unstable prediction, many predictors, correlated predictors, or overfitting.</div>
+</section>
+
+<section id="m1" class="module">
+<h2>2. Why penalise?</h2><div class="grid2">
+<div class="card"><h3>Ordinary regression</h3><p>Ordinary least squares minimises the residual sum of squares, the total squared difference between observed and predicted outcomes.</p><div class="eq">RSS = Σ(yᵢ − ŷᵢ)²</div><p>When predictors overlap strongly, different coefficient combinations can give similar predictions, so individual coefficients can become unstable.</p></div>
+<div class="card"><h3>Penalised regression</h3><div class="eq">Objective = model loss + penalty</div><p>The penalty makes large coefficients costly. The model accepts some bias if this reduces variance and improves prediction in new data.</p><div class="note good"><b>Core idea:</b> shrink coefficients toward zero to control model flexibility.</div></div>
+</div>
+<div class="card"><h3>Worked intuition</h3><table><tr><th>Predictor</th><th>OLS</th><th>After shrinkage</th><th>Interpretation</th></tr><tr><td>Age</td><td>1.20</td><td>1.05</td><td>Retained</td></tr><tr><td>BMI</td><td>3.00</td><td>1.80</td><td>Shrunk</td></tr><tr><td>Waist</td><td>2.60</td><td>1.50</td><td>Shrunk</td></tr><tr><td>Weak marker</td><td>0.10</td><td>0 under lasso</td><td>Removed</td></tr></table></div>
+</section>
+
+<section id="m2" class="module">
+<h2>3. Main terms</h2><div class="terms">
+<div class="term"><b>Regularisation</b>Constraining model flexibility to improve stability and reduce overfitting.</div>
+<div class="term"><b>Penalty</b>An extra cost added to the fitting objective.</div>
+<div class="term"><b>Shrinkage</b>Pulling coefficients toward zero.</div>
+<div class="term"><b>Lambda, λ</b>Controls how strong the penalty is.</div>
+<div class="term"><b>Alpha, α</b>Controls the ridge-versus-lasso mixture in elastic net.</div>
+<div class="term"><b>L1 penalty</b>Sum of absolute coefficient values. Used by lasso.</div>
+<div class="term"><b>L2 penalty</b>Sum of squared coefficient values. Used by ridge.</div>
+<div class="term"><b>Sparse model</b>A model with many coefficients exactly zero.</div>
+<div class="term"><b>Active set</b>Predictors currently having non-zero coefficients.</div>
+<div class="term"><b>Cross-validation</b>Training on part of the data and evaluating on held-out observations.</div>
+<div class="term"><b>Coefficient path</b>How each coefficient changes across λ.</div>
+<div class="term"><b>p &gt; n</b>More predictors than observations.</div>
+</div><div class="card note warn"><b>Do not confuse:</b> λ controls <i>how much</i> penalisation is used. α controls <i>what kind</i> of penalisation elastic net uses.</div>
+</section>
+
+<section id="m3" class="module">
+<h2>4. Lambda lab: feel the shrinkage</h2>
+<div class="card"><div class="controls"><div><label>Penalty strength λ: <span id="l3v">0.10</span></label><input id="l3" type="range" min="0" max="1.2" step=".01" value=".10"></div><div><label>Penalty type</label><select id="a3"><option value="0">Ridge</option><option value="1">Lasso</option><option value=".5">Elastic net, α = 0.5</option></select></div></div>
+<div class="kpi"><div><span class="small">Train MSE</span><b id="tr3">-</b></div><div><span class="small">Test MSE</span><b id="te3">-</b></div><div><span class="small">Non-zero coefficients</span><b id="nz3">-</b></div><div><span class="small">Largest |β|</span><b id="mx3">-</b></div></div></div>
+<div class="grid2"><div class="card"><h3>Current coefficients</h3><canvas id="c3" width="700" height="330"></canvas></div><div class="card"><h3>Prediction error versus λ</h3><canvas id="e3" width="700" height="330"></canvas></div></div>
+<div class="note">Move λ upward. Ridge shrinks coefficients continuously. Lasso and elastic net can make weak coefficients exactly zero.</div>
+</section>
+
+<section id="m4" class="module">
+<h2>5. Ridge versus lasso</h2><div class="grid2">
+<div class="card"><h3>Ridge, L2</h3><div class="eq">loss + λ Σβⱼ²</div><p>Shrinks coefficients but generally retains all predictors. Correlated predictors can share signal.</p><button class="action" onclick="demo(0,'Ridge')">Show ridge</button></div>
+<div class="card"><h3>Lasso, L1</h3><div class="eq">loss + λ Σ|βⱼ|</div><p>Can set coefficients exactly to zero, giving automatic variable selection. Correlated predictors may compete.</p><button class="action" onclick="demo(1,'Lasso')">Show lasso</button></div>
+</div><div class="card"><canvas id="c4" width="1000" height="360"></canvas><p id="t4" class="small"></p></div>
+</section>
+
+<section id="m5" class="module">
+<h2>6. Elastic net</h2><div class="card"><div class="controls"><div><label>Alpha α: <span id="a5v">0.50</span></label><input id="a5" type="range" min="0" max="1" step=".05" value=".5"><div class="small">0 = ridge, 1 = lasso</div></div><div><label>Lambda λ: <span id="l5v">0.12</span></label><input id="l5" type="range" min="0" max="1.2" step=".01" value=".12"></div></div></div>
+<div class="grid2"><div class="card"><h3>Coefficient behaviour</h3><canvas id="c5" width="700" height="340"></canvas></div><div class="card"><h3>Current solution</h3><div id="s5"></div><div class="note good">Elastic net can perform variable selection while retaining more of the ridge behaviour that is useful with correlated predictor groups.</div></div></div>
+</section>
+
+<section id="m6" class="module">
+<h2>7. Coefficient paths</h2><div class="card"><div class="controls"><div><label>Choose α</label><select id="a6"><option value="0">0, ridge</option><option value=".5" selected>0.5, elastic net</option><option value="1">1, lasso</option></select></div><div><label>Highlight λ: <span id="l6v">0.20</span></label><input id="l6" type="range" min="0" max="1.2" step=".01" value=".2"></div></div></div><div class="card"><canvas id="c6" width="1000" height="420"></canvas></div><div class="note">Each line is one predictor. Increasing λ pulls the paths toward zero. Under lasso, some paths reach zero and stay there.</div>
+</section>
+
+<section id="m7" class="module">
+<h2>8. Cross-validation</h2><div class="card"><div class="controls"><div><label>Penalty family</label><select id="a7"><option value="0">Ridge</option><option value=".5">Elastic net</option><option value="1">Lasso</option></select></div><div><button id="cvbtn" class="action">Run 5-fold cross-validation</button></div></div><div class="progress"><div id="prog"></div></div></div>
+<div class="grid2"><div class="card"><h3>Mean validation MSE</h3><canvas id="c7" width="700" height="340"></canvas></div><div class="card"><h3>What did CV choose?</h3><div id="s7" class="small">Run cross-validation to populate this panel.</div></div></div>
+</section>
+
+<section id="m8" class="module">
+<h2>9. Correlated-predictor trap</h2><div class="card"><p>X1 and X2 are deliberately highly correlated and carry nearly the same signal. Lasso can treat one as a representative of shared information. A new sample can change the selected pattern.</p><button id="resample" class="action">Draw a new sample and refit lasso</button><div class="kpi"><div><span class="small">Correlation X1, X2</span><b id="r8">-</b></div><div><span class="small">Selected X1</span><b id="x18">-</b></div><div><span class="small">Selected X2</span><b id="x28">-</b></div><div><span class="small">Selected variables</span><b id="n8">-</b></div></div></div>
+<div class="grid2"><div class="card"><h3>Current lasso coefficients</h3><canvas id="c8" width="700" height="340"></canvas></div><div class="card"><h3>Interpretation</h3><div id="t8"></div><div class="note warn"><b>Important:</b> selected by lasso does not mean causal, uniquely important, or stable across samples.</div></div></div>
+</section>
+
+<section id="m9" class="module">
+<h2>10. Final challenge</h2>
+<div class="card"><h3>Scenario 1</h3><p>Thirty prespecified clinical predictors are moderately correlated. The goal is stable prediction and automatic deletion is not needed. Best starting point?</p><button class="quiz" data-q="1" data-a="r">Ridge</button><button class="quiz" data-q="1" data-a="l">Lasso</button><button class="quiz" data-q="1" data-a="e">Elastic net</button><p id="f1" class="small"></p></div>
+<div class="card"><h3>Scenario 2</h3><p>Five hundred biomarkers, sparse prediction desired, many biomarkers in highly correlated clusters. Best starting point?</p><button class="quiz" data-q="2" data-a="r">Ridge</button><button class="quiz" data-q="2" data-a="l">Lasso</button><button class="quiz" data-q="2" data-a="e">Elastic net</button><p id="f2" class="small"></p></div>
+<div class="card"><h3>Scenario 3</h3><p>Lasso selected one biomarker and set a strongly correlated biomarker to zero. Can you conclude the selected biomarker is biologically more important?</p><button class="quiz" data-q="3" data-a="y">Yes</button><button class="quiz" data-q="3" data-a="n">No</button><p id="f3" class="small"></p></div>
+<div class="card note good"><b>Decision process:</b> define the modelling goal, decide whether sparsity is desirable, inspect predictor correlation, then tune λ and, for elastic net, α using resampling.</div>
+</section>
+
+</main></div>
+<script>
+function rng(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
+function rn(r){let u=0,v=0;while(!u)u=r();while(!v)v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+const avg=a=>a.reduce((s,x)=>s+x,0)/a.length;
+function sd(a){let m=avg(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/a.length)}
+function std(X){let p=X[0].length,m=[],s=[];for(let j=0;j<p;j++){let c=X.map(r=>r[j]);m[j]=avg(c);s[j]=sd(c)||1}return{m,s,Z:X.map(r=>r.map((v,j)=>(v-m[j])/s[j]))}}
+const soft=(z,g)=>Math.sign(z)*Math.max(Math.abs(z)-g,0);
+function fit(X,y,l,a){let n=X.length,p=X[0].length,b=Array(p).fill(0),pr=Array(n).fill(0);for(let it=0;it<300;it++){let md=0;for(let j=0;j<p;j++){let old=b[j],rho=0,z=0;for(let i=0;i<n;i++){let rr=y[i]-(pr[i]-old*X[i][j]);rho+=X[i][j]*rr;z+=X[i][j]**2}rho/=n;z/=n;let ne=soft(rho,l*a)/(z+l*(1-a)),d=ne-old;if(d)for(let i=0;i<n;i++)pr[i]+=d*X[i][j];b[j]=ne;md=Math.max(md,Math.abs(d))}if(md<1e-7)break}return b}
+const pred=(X,b)=>X.map(r=>r.reduce((s,x,j)=>s+x*b[j],0)),mse=(y,p)=>avg(y.map((v,i)=>(v-p[i])**2));
+function data(seed=20260907,n=180){let r=rng(seed),X=[],y=[];for(let i=0;i<n;i++){let z1=rn(r),z2=rn(r),z3=rn(r),x1=z1+.2*rn(r),x2=.95*z1+.2*rn(r),x3=.8*z1+.45*rn(r),x4=z2,x5=.75*z2+.55*rn(r),x6=z3,x7=rn(r),x8=rn(r);X.push([x1,x2,x3,x4,x5,x6,x7,x8]);y.push(2.2*x1+1.8*x2+1.4*x4-1.2*x6+1.6*rn(r))}return{X,y}}
+const N=["X1","X2","X3","X4","X5","X6","X7","X8"];let D=data();
+function prep(ids,sc=null,ym=null,d=D){let X=ids.map(i=>d.X[i]),y=ids.map(i=>d.y[i]);if(!sc){sc=std(X);ym=avg(y);return{X:sc.Z,y:y.map(v=>v-ym),sc,ym}}return{X:X.map(r=>r.map((v,j)=>(v-sc.m[j])/sc.s[j])),y:y.map(v=>v-ym),sc,ym}}
+let T=prep([...Array(130).keys()]),V=prep([...Array(50).keys()].map(i=>i+130),T.sc,T.ym);
+function F(l,a){let b=fit(T.X,T.y,l,a);return{b,tr:mse(T.y,pred(T.X,b)),te:mse(V.y,pred(V.X,b))}}
+function axes(c,w,h,p=45){c.strokeStyle="#b9c5d6";c.beginPath();c.moveTo(p,15);c.lineTo(p,h-p);c.lineTo(w-10,h-p);c.stroke();return p}
+function bars(id,v){let c=document.getElementById(id).getContext("2d"),w=c.canvas.width,h=c.canvas.height;c.clearRect(0,0,w,h);let p=axes(c,w,h),mx=Math.max(.01,...v.map(Math.abs)),mid=(h-p+15)/2,bw=(w-p-20)/v.length*.65;c.strokeStyle="#d5dce8";c.beginPath();c.moveTo(p,mid);c.lineTo(w-10,mid);c.stroke();v.forEach((x,j)=>{let xx=p+(j+.5)*(w-p-20)/v.length,hh=(h-p-30)/2*Math.abs(x)/mx;c.fillStyle=x>=0?"#4c78a8":"#b65f5f";c.fillRect(xx-bw/2,x>=0?mid-hh:mid,bw,hh);c.fillStyle="#34445f";c.font="12px sans-serif";c.textAlign="center";c.fillText(N[j],xx,h-16)})}
+function lines(id,x,ys,mark=null){let c=document.getElementById(id).getContext("2d"),w=c.canvas.width,h=c.canvas.height;c.clearRect(0,0,w,h);let p=axes(c,w,h),all=ys.flat(),mn=Math.min(...all),mx=Math.max(...all);if(mn===mx){mn--;mx++}let X=v=>p+(v-x[0])/(x.at(-1)-x[0])*(w-p-18),Y=v=>15+(mx-v)/(mx-mn)*(h-p-20),cols=["#4c78a8","#59a14f","#f28e2b","#e15759","#76b7b2","#edc949","#af7aa1","#9c755f"];ys.forEach((s,k)=>{c.strokeStyle=cols[k%8];c.lineWidth=2;c.beginPath();s.forEach((v,i)=>i?c.lineTo(X(x[i]),Y(v)):c.moveTo(X(x[i]),Y(v)));c.stroke()});if(mark!==null){c.strokeStyle="#333";c.setLineDash([5,4]);c.beginPath();c.moveTo(X(mark),15);c.lineTo(X(mark),h-p);c.stroke();c.setLineDash([])}}
+function up3(){let l=+l3.value,a=+a3.value,f=F(l,a);l3v.textContent=l.toFixed(2);tr3.textContent=f.tr.toFixed(2);te3.textContent=f.te.toFixed(2);nz3.textContent=f.b.filter(x=>Math.abs(x)>1e-6).length;mx3.textContent=Math.max(...f.b.map(Math.abs)).toFixed(2);bars("c3",f.b);let ls=[...Array(31)].map((_,i)=>i*.04),tr=[],te=[];ls.forEach(x=>{let z=F(x,a);tr.push(z.tr);te.push(z.te)});lines("e3",ls,[tr,te],l)}
+l3.oninput=up3;a3.onchange=up3;
+function demo(a,name){let f=F(.16,a);bars("c4",f.b);t4.textContent=name==="Ridge"?"Ridge shrinks all coefficients and tends to retain correlated predictors together.":"Lasso can make coefficients exactly zero. With correlated predictors, the selected representative can be unstable."}
+function up5(){let a=+a5.value,l=+l5.value,f=F(l,a),act=f.b.map((x,i)=>Math.abs(x)>1e-6?N[i]:null).filter(Boolean);a5v.textContent=a.toFixed(2);l5v.textContent=l.toFixed(2);bars("c5",f.b);s5.innerHTML="<p><b>"+act.length+"</b> of "+N.length+" coefficients are non-zero.</p><p><b>Active set:</b> "+(act.join(", ")||"none")+"</p><p><b>Test MSE:</b> "+f.te.toFixed(2)+"</p>"}
+a5.oninput=up5;l5.oninput=up5;
+function up6(){let a=+a6.value,l=+l6.value,ls=[...Array(61)].map((_,i)=>i*.02),ys=N.map(()=>[]);ls.forEach(x=>F(x,a).b.forEach((v,j)=>ys[j].push(v)));l6v.textContent=l.toFixed(2);lines("c6",ls,ys,l)}
+a6.onchange=up6;l6.oninput=up6;
+cvbtn.onclick=async()=>{let a=+a7.value,ls=[...Array(25)].map((_,i)=>i*.04),E=ls.map(()=>[]);prog.style.width="0";for(let k=0;k<5;k++){let va=[],tr=[];for(let i=0;i<D.X.length;i++)(i%5===k?va:tr).push(i);let A=prep(tr),B=prep(va,A.sc,A.ym);ls.forEach((l,j)=>{let b=fit(A.X,A.y,l,a);E[j].push(mse(B.y,pred(B.X,b)))});prog.style.width=(k+1)*20+"%";await new Promise(r=>setTimeout(r,30))}let M=E.map(avg),SE=E.map(x=>sd(x)/Math.sqrt(5)),im=M.indexOf(Math.min(...M)),thr=M[im]+SE[im],i1=im;M.forEach((m,j)=>{if(m<=thr)i1=j});lines("c7",ls,[M],ls[im]);s7.innerHTML="<p><b>λ.min:</b> "+ls[im].toFixed(2)+", mean CV MSE "+M[im].toFixed(2)+"</p><p><b>Approximate λ.1SE:</b> "+ls[i1].toFixed(2)+"</p><p>The 1SE choice uses stronger regularisation while remaining within one standard error of the minimum CV error.</p>"}
+let seed=100;function trap(){let d=data(++seed,120),I=[...Array(120).keys()],P=prep(I,null,null,d),b=fit(P.X,P.y,.22,1),x=d.X.map(r=>r[0]),y=d.X.map(r=>r[1]),mx=avg(x),my=avg(y),r=x.reduce((s,v,i)=>s+(v-mx)*(y[i]-my),0)/Math.sqrt(x.reduce((s,v)=>s+(v-mx)**2,0)*y.reduce((s,v)=>s+(v-my)**2,0));bars("c8",b);r8.textContent=r.toFixed(2);x18.textContent=Math.abs(b[0])>1e-6?"Yes":"No";x28.textContent=Math.abs(b[1])>1e-6?"Yes":"No";n8.textContent=b.filter(v=>Math.abs(v)>1e-6).length;t8.innerHTML="<p>X1 coefficient: <b>"+b[0].toFixed(2)+"</b><br>X2 coefficient: <b>"+b[1].toFixed(2)+"</b></p><p>Repeat the resampling. Changes in selection illustrate selection instability, not changing biology.</p>"}
+resample.onclick=trap;
+document.querySelectorAll(".quiz").forEach(b=>b.onclick=()=>{let q=b.dataset.q,a=b.dataset.a,ok=(q==="1"&&a==="r")||(q==="2"&&a==="e")||(q==="3"&&a==="n");b.classList.add(ok?"correct":"wrong");document.getElementById("f"+q).textContent=q==="1"?(ok?"Correct. Ridge is a natural starting point when stable prediction is wanted without sparsity.":"Because variable deletion is not needed, ridge is the more direct starting point."):q==="2"?(ok?"Correct. Elastic net combines sparsity with better behaviour for correlated groups.":"Correlated groups plus desired sparsity make elastic net a natural starting point."):(ok?"Correct. Lasso selection is not proof of biological or causal importance.":"No. Selection depends on the penalty, sample, predictor set, and correlation structure.")});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".module").forEach(x=>x.classList.remove("active"));document.getElementById(b.dataset.m).classList.add("active");if(b.dataset.m==="m3")up3();if(b.dataset.m==="m5")up5();if(b.dataset.m==="m6")up6();if(b.dataset.m==="m8")trap()});
+demo(0,"Ridge");up3();up5();up6();trap();
+</script>
+</body></html>
