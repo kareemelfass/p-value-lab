@@ -1,0 +1,16 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Propensity Score Learning Lab</title></head>
+<body><div style="font-family:system-ui;padding:24px">Loading Propensity Score Learning Lab…</div>
+<script>
+(async()=>{
+  try{
+    const b64=(await (await fetch('./app.gz.b64')).text()).replace(/\s+/g,'');
+    const bin=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+    const ds=new DecompressionStream('gzip');
+    const html=await new Response(new Blob([bin]).stream().pipeThrough(ds)).text();
+    document.open(); document.write(html); document.close();
+  }catch(e){
+    document.body.innerHTML='<pre style="white-space:pre-wrap;font-family:system-ui;padding:24px">Failed to load the lab: '+e+'</pre>';
+  }
+})();
+</script></body></html>
