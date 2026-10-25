@@ -19,6 +19,12 @@ The current version simulates two independent normally distributed groups with e
 
 This is an educational tool, not a substitute for study-specific statistical analysis.
 
+## Additional Interactive Tutorials
+
+- **[Build a Kaplan–Meier Curve](https://kareemelfass.github.io/p-value-lab/km-curve/)**: Follow risk sets, censoring, conditional survival and the stepwise KM curve.
+- **[Survival & Hazard: Five Curves, One Story](https://kareemelfass.github.io/p-value-lab/survival-hazard/)**: Explore S(t), F(t), f(t), h(t) and H(t) with linked graphs and guided calculations.
+- **[Browse the Interactive Biostatistics Learning Tools collection](https://github.com/kareemelfass/Interactive-Biostatistics-Learning-Tools)**
+
 ## Run locally
 
 Open `index.html` in a modern browser. No dependencies or build step are required.
