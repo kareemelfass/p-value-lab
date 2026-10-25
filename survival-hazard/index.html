@@ -43,7 +43,7 @@ a{color:var(--blue)}a:focus-visible,button:focus-visible,input:focus-visible{out
 <article class="surface graph-card" data-key="F" id="graph-F"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--orange)">2 · Cumulative distribution, F(t)</h3><div class="graph-formula">F(t) = 1 − S(t)</div></div></div><p class="graph-desc">Probability the event has occurred by t.</p><svg class="graph-svg" data-plot="F" viewBox="0 0 500 250" role="img" aria-label="Cumulative distribution function with interactive time marker"></svg><div class="graph-note">At any time, S(t) + F(t) = 1.</div></article>
 <article class="surface graph-card" data-key="f" id="graph-f"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--teal)">3 · Probability density, f(t)</h3><div class="graph-formula">f(t) = dF(t)/dt</div></div></div><p class="graph-desc">How event probability is distributed across time.</p><svg class="graph-svg" data-plot="f" viewBox="0 0 500 250" role="img" aria-label="Probability density with area through selected time shaded"></svg><div class="graph-note">Shaded area from 0 to t equals F(t), not f(t).</div></article>
 <article class="surface graph-card" data-key="h" id="graph-h"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--red)">4 · Instantaneous hazard, h(t)</h3><div class="graph-formula">h(t) = f(t) / S(t)</div></div></div><p class="graph-desc">Instantaneous event rate among people still event-free.</p><svg class="graph-svg" data-plot="h" viewBox="0 0 500 250" role="img" aria-label="Instantaneous hazard function"></svg><div class="graph-note">Its numerical value is a rate per month, not a probability.</div></article>
-<article class="surface graph-card graph-wide" data-key="H" id="graph-H"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--purple)">5 · Cumulative hazard, H(t)</h3><div class="graph-formula">H(t) = ∫₀ᵗ h(u) du = −ln S(t)</div></div></div><p class="graph-desc">Total integrated hazard up to t. Its shaded area is H(t), while the risk of having had an event by t is F(t) = 1 − exp[−H(t)].</p><svg class="graph-svg" data-plot="H" viewBox="0 0 750 230" role="img" aria-label="Cumulative hazard with linked time marker"></svg><div class="graph-note">Cumulative hazard is not cumulative event probability.</div></article>
+<article class="surface graph-card graph-wide" data-key="H" id="graph-H"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--purple)">5 · Cumulative hazard, H(t)</h3><div class="graph-formula">H(t) = ∫₀ᵗ h(u) du = −ln S(t)</div></div></div><p class="graph-desc">Total integrated hazard up to t. The shaded area under the hazard h(u) is H(t), while the risk of an event by t is F(t) = 1 − exp[−H(t)].</p><svg class="graph-svg" data-plot="H" viewBox="0 0 750 230" role="img" aria-label="Cumulative hazard with linked time marker; its value is the area under the hazard curve, not the area under this curve"></svg><div class="graph-note">Cumulative hazard is not cumulative event probability.</div></article>
 </section>
 <section class="surface guide" id="guide">
 <div class="guide-head"><div><div class="lesson-kicker">GUIDED EXPLANATION</div><h2>Understand what each curve means</h2></div><div class="small" id="step-count">Lesson 1 of 5</div></div>
@@ -138,11 +138,7 @@ function svgGraph(svg,key){
   shade+=' L'+x(limit)+' '+y(0)+' Z';
   pieces.push('<path d="'+shade+'" fill="'+palette[key]+'" opacity=".12" stroke="none"/>');
  }
- // Cumulative hazard is itself an integral. Shade under its derivative h(t), not under H(t).
- if(key==='H'){
-  var np2=180,shadeH='M'+x(0)+' '+y(0);
-  // Keep H graph unshaded to avoid suggesting area under H equals H.
- }
+ // Do not shade the H(t) curve: the relevant area is under h(t), shown in its own plot.
  pieces.push('<path d="'+path+'" fill="none" stroke="'+palette[key]+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>');
  var tx0=x(state.t),ty0=y(at);
  pieces.push('<line x1="'+tx0+'" y1="'+top+'" x2="'+tx0+'" y2="'+(top+plotH)+'" stroke="#667e91" stroke-dasharray="4 5" stroke-width="1.4"/>');
