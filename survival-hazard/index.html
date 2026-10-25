@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="An interactive learning lab connecting survival, the cumulative distribution function, probability density, instantaneous hazard, and cumulative hazard.">
+<title>Survival & Hazard | Interactive Biostatistics Learning Tools</title>
+<style>
+:root{--ink:#19283a;--muted:#596b7d;--line:#dce5ed;--background:#f5f8fb;--panel:#fff;--navy:#122b44;--blue:#2468ab;--blue-bg:#e8f2fb;--orange:#bb631a;--orange-bg:#fff2df;--teal:#187c73;--teal-bg:#e3f5f1;--purple:#7854a2;--purple-bg:#f2eafb;--red:#a84249;--shadow:0 7px 28px rgba(22,43,67,.055)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--background);color:var(--ink);font:16px/1.55 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--blue)}a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid #dc994d;outline-offset:3px}
+.container{max-width:1140px;margin:auto;padding:0 20px}.top{background:var(--navy);color:#f8fcff;padding:16px 0}.top .container{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}.brand{font-size:13px;font-weight:650;letter-spacing:.025em}.top a{color:#d6eafa;text-decoration:none;font-size:13px}
+.hero{padding:36px 0 16px}.eyebrow{color:var(--teal);font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em}.hero h1{font-size:clamp(30px,5vw,49px);line-height:1.13;letter-spacing:-.035em;max-width:830px;margin:8px 0 12px}.lead{font-size:18px;color:var(--muted);max-width:880px;margin:0 0 22px}.intro{display:grid;grid-template-columns:1fr 1fr;gap:16px}.surface{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.intro .surface{padding:21px}.surface h2,.surface h3{margin-top:0}.intro h2{font-size:18px;margin:0 0 8px}.intro p{margin:6px 0}.foundation{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-top:11px;font-size:14px}.pill{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:#f9fbfd;font-weight:650}.arrow{color:var(--muted);font-weight:700}.small{font-size:13px;color:var(--muted)}.section-label{margin:34px 0 12px;font-size:22px;letter-spacing:-.02em}.controls{padding:20px;margin:16px 0 18px}.control-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.control-head h2{margin:0;font-size:20px}.presets{display:flex;gap:7px;flex-wrap:wrap;margin:12px 0 22px}.preset,.nav-btn,.reset{font:inherit;cursor:pointer;border:1px solid var(--line);border-radius:9px;padding:10px 13px;min-height:43px;background:#fff;color:var(--ink)}.preset[aria-pressed="true"]{color:#fff;background:var(--navy);border-color:var(--navy)}.reset{font-size:14px;padding:8px 12px}.sliders{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:24px}.control label{display:flex;justify-content:space-between;font-size:14px;font-weight:700;gap:10px}.control output{color:var(--blue);font-variant-numeric:tabular-nums}.control input{width:100%;accent-color:var(--blue);cursor:pointer;min-height:32px;margin:9px 0 0}.control .small{display:block}.narrative{margin-top:17px;background:#f2f7fc;border:1px solid #dceaf7;padding:12px 14px;border-radius:10px;color:#294760}.metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:20px 0}.metric{border:1px solid var(--line);border-top:4px solid var(--tone);padding:11px 12px;background:#fff;border-radius:10px;min-width:0}.metric .symbol{font-size:16px;font-weight:750;color:var(--tone)}.metric .value{font-size:clamp(18px,2.2vw,24px);font-weight:780;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:6px 0 0;overflow-wrap:anywhere}.metric .units{font-size:12px;color:var(--muted)}.graph-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.graph-card{padding:17px;min-width:0;scroll-margin-top:20px;transition:border-color .12s,box-shadow .12s}.graph-card.focus{border-color:#5685b9;box-shadow:0 0 0 3px #dceaf7}.graph-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.graph-name{font-size:17px;font-weight:750;margin:0}.graph-formula{font:600 14px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--muted);margin-top:3px}.graph-desc{font-size:13px;color:var(--muted);margin-top:7px;min-height:40px}.graph-svg{display:block;width:100%;height:auto;margin-top:7px;cursor:crosshair;touch-action:pan-y}.graph-note{font-size:12px;color:var(--muted);min-height:18px}.graph-wide{grid-column:span 2}.graph-wide .graph-svg{max-height:235px}.guide{margin:18px 0;padding:20px}.guide-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}.guide h2{font-size:21px;margin:0}.lesson-kicker{font-size:13px;font-weight:800;color:var(--teal)}.guide-nav{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0}.guide-nav button{font:inherit;border:1px solid var(--line);padding:7px 11px;background:#fff;border-radius:8px;cursor:pointer;font-size:13px;min-height:40px}.guide-nav button[aria-current="step"]{background:var(--blue-bg);border-color:var(--blue);font-weight:700;color:#144778}.lesson-body{background:#f5f9fd;border-radius:12px;padding:16px 18px;min-height:130px}.lesson-body h3{margin:0 0 7px;font-size:19px}.lesson-body p{margin:7px 0}.lesson-body strong{color:var(--navy)}.lesson-arrows{display:flex;justify-content:space-between;gap:8px;margin-top:13px}.nav-btn.primary{background:var(--navy);color:white;border-color:var(--navy)}.nav-btn:disabled{opacity:.35;cursor:not-allowed}.relations{padding:19px;margin:18px 0}.relations h2{font-size:22px;margin:0 0 8px}.relations-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.relation{border:1px solid var(--line);border-radius:10px;padding:13px;background:#fcfdff}.relation code{font-size:15px;font-weight:750;color:#1b507f;white-space:normal}.relation p{margin:6px 0 0;font-size:13px;color:var(--muted)}.try{padding:19px;margin:18px 0 26px}.try ol{margin:8px 0;padding-left:22px}.try li{margin:5px 0}.footer{border-top:1px solid var(--line);padding:22px 0 34px;color:var(--muted);font-size:13px}.footer p{margin:8px 0}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+@media(max-width:800px){.intro,.sliders,.graph-grid,.relations-grid{grid-template-columns:1fr}.graph-wide{grid-column:auto}.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.metric:last-child{grid-column:span 2}.graph-desc{min-height:0}.sliders{gap:17px}}@media(max-width:380px){.container{padding:0 12px}.metric .value{font-size:20px}.graph-card,.guide,.relations,.controls{padding:13px}.hero{padding-top:22px}.intro .surface{padding:15px}}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="container"><div class="brand">Interactive Biostatistics Learning Tools</div><a href="https://github.com/kareemelfass/Interactive-Biostatistics-Learning-Tools">View the learning-lab collection</a></div></header>
+<main class="container">
+<section class="hero">
+<div class="eyebrow">Survival analysis · Interactive concept lab</div>
+<h1>Survival & hazard: five curves, one story</h1>
+<p class="lead">Survival, CDF, PDF, hazard, and cumulative hazard are different ways of describing <strong>when an event happens</strong>. Change the model or move through time and watch all five curves respond together.</p>
+</section>
+<section class="intro" aria-label="Introduction">
+<div class="surface"><h2>Begin with one question</h2><p>Imagine following people from treatment until an event. At month <strong>t</strong>, some have experienced the event and others have not.</p><p><strong>Survival</strong> describes those remaining event-free. <strong>CDF</strong> describes those whose event has already happened.</p><div class="foundation"><span class="pill">Survived beyond t</span><span class="arrow">+</span><span class="pill">Event by t</span><span class="arrow">= 100%</span></div></div>
+<div class="surface"><h2>What do the other three add?</h2><p><strong>PDF</strong> shows where event probability is concentrated along time. <strong>Hazard</strong> measures the instantaneous event rate among those still event-free. <strong>Cumulative hazard</strong> adds that rate over time.</p><p class="small">Important: a density is not a point probability, a hazard is a rate rather than a probability, and cumulative hazard can exceed 1.</p></div>
+</section>
+<h2 class="section-label" id="explore">Explore the five curves</h2>
+<section class="surface controls" aria-label="Simulation controls">
+<div class="control-head"><div><h2>Choose how risk changes over time</h2><div class="small">The curves use a Weibull time-to-event model. The exponential model is its constant-hazard case.</div></div><button type="button" class="reset" id="reset">Reset example</button></div>
+<div class="presets" aria-label="Hazard shape examples"><button type="button" class="preset" data-shape="0.65" aria-pressed="false">↘ Decreasing hazard</button><button type="button" class="preset" data-shape="1" aria-pressed="false">→ Constant hazard</button><button type="button" class="preset" data-shape="2" aria-pressed="false">↗ Increasing hazard</button></div>
+<div class="sliders">
+<div class="control"><label for="shape">Shape (k) <output id="shape-out" for="shape">1.80</output></label><input id="shape" type="range" min="0.5" max="3" step="0.05" value="1.8"><span class="small">Below 1: decreasing; 1: constant; above 1: increasing hazard</span></div>
+<div class="control"><label for="scale">Time scale (λ) <output id="scale-out" for="scale">7.0 months</output></label><input id="scale" type="range" min="2" max="14" step="0.5" value="7"><span class="small">Higher values shift event times later</span></div>
+<div class="control"><label for="time">Inspect time (t) <output id="time-out" for="time">4.0 months</output></label><input id="time" type="range" min="0.2" max="16" step="0.1" value="4"><span class="small">Move the vertical line on every curve, or click a graph</span></div>
+</div>
+<div id="narrative" class="narrative" aria-live="polite"></div>
+</section>
+<section aria-label="Five linked values"><div id="metrics" class="metrics" aria-live="polite"></div></section>
+<section class="graph-grid" aria-label="Five linked interactive plots">
+<article class="surface graph-card" data-key="S" id="graph-S"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--blue)">1 · Survival function, S(t)</h3><div class="graph-formula">S(t) = P(T &gt; t)</div></div></div><p class="graph-desc">Probability of remaining event-free beyond t.</p><svg class="graph-svg" data-plot="S" viewBox="0 0 500 250" role="img" aria-label="Survival function with interactive time marker"></svg><div class="graph-note">The curve starts at 100% and falls towards 0.</div></article>
+<article class="surface graph-card" data-key="F" id="graph-F"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--orange)">2 · Cumulative distribution, F(t)</h3><div class="graph-formula">F(t) = 1 − S(t)</div></div></div><p class="graph-desc">Probability the event has occurred by t.</p><svg class="graph-svg" data-plot="F" viewBox="0 0 500 250" role="img" aria-label="Cumulative distribution function with interactive time marker"></svg><div class="graph-note">At any time, S(t) + F(t) = 1.</div></article>
+<article class="surface graph-card" data-key="f" id="graph-f"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--teal)">3 · Probability density, f(t)</h3><div class="graph-formula">f(t) = dF(t)/dt</div></div></div><p class="graph-desc">How event probability is distributed across time.</p><svg class="graph-svg" data-plot="f" viewBox="0 0 500 250" role="img" aria-label="Probability density with area through selected time shaded"></svg><div class="graph-note">Shaded area from 0 to t equals F(t), not f(t).</div></article>
+<article class="surface graph-card" data-key="h" id="graph-h"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--red)">4 · Instantaneous hazard, h(t)</h3><div class="graph-formula">h(t) = f(t) / S(t)</div></div></div><p class="graph-desc">Instantaneous event rate among people still event-free.</p><svg class="graph-svg" data-plot="h" viewBox="0 0 500 250" role="img" aria-label="Instantaneous hazard function"></svg><div class="graph-note">Its numerical value is a rate per month, not a probability.</div></article>
+<article class="surface graph-card graph-wide" data-key="H" id="graph-H"><div class="graph-head"><div><h3 class="graph-name" style="color:var(--purple)">5 · Cumulative hazard, H(t)</h3><div class="graph-formula">H(t) = ∫₀ᵗ h(u) du = −ln S(t)</div></div></div><p class="graph-desc">Total integrated hazard up to t. Its shaded area is H(t), while the risk of having had an event by t is F(t) = 1 − exp[−H(t)].</p><svg class="graph-svg" data-plot="H" viewBox="0 0 750 230" role="img" aria-label="Cumulative hazard with linked time marker"></svg><div class="graph-note">Cumulative hazard is not cumulative event probability.</div></article>
+</section>
+<section class="surface guide" id="guide">
+<div class="guide-head"><div><div class="lesson-kicker">GUIDED EXPLANATION</div><h2>Understand what each curve means</h2></div><div class="small" id="step-count">Lesson 1 of 5</div></div>
+<nav class="guide-nav" aria-label="Lesson steps">
+<button type="button" data-lesson="0" aria-current="step">1 · Survival &amp; CDF</button>
+<button type="button" data-lesson="1">2 · PDF</button>
+<button type="button" data-lesson="2">3 · Hazard</button>
+<button type="button" data-lesson="3">4 · Cumulative hazard</button>
+<button type="button" data-lesson="4">5 · Connect everything</button>
+</nav>
+<div id="lesson-body" class="lesson-body" aria-live="polite"></div>
+<div class="lesson-arrows"><button type="button" class="nav-btn" id="lesson-prev">← Previous lesson</button><button type="button" class="nav-btn primary" id="lesson-next">Next lesson →</button></div>
+</section>
+<section class="surface relations">
+<h2>One model, five equivalent descriptions</h2><p class="small">Watch the numbers update as you change time and model parameters. These are mathematical identities for a continuous time-to-event distribution.</p>
+<div id="relations" class="relations-grid" aria-live="polite"></div>
+</section>
+<section class="surface try">
+<h2>Try three experiments</h2>
+<ol><li>Choose <strong>constant hazard</strong>. Notice that the hazard graph is flat, but survival still declines with time.</li><li>Choose <strong>increasing hazard</strong>. Watch the hazard rise while survival falls. Notice that the PDF can rise and then fall, even when hazard keeps increasing.</li><li>Set <strong>t = 8 months</strong>. Compare F(t), the shaded area under the PDF, with H(t), the shaded area under the hazard. They are generally not equal.</li></ol>
+<p class="small">Model assumptions: continuously distributed event times, no competing risks, and no cure fraction. This lab plots smooth parametric Weibull curves. The non-parametric Kaplan–Meier estimator instead produces a stepwise survival curve from observed events and censoring.</p>
+</section>
+</main>
+<footer class="footer"><div class="container">
+<p><strong>Methodological references:</strong> Klein JP, Moeschberger ML. <em>Survival Analysis: Techniques for Censored and Truncated Data.</em> 2nd ed. Springer, 2003; Collett D. <em>Modelling Survival Data in Medical Research.</em> 3rd ed. CRC Press, 2015.</p>
+<p>Based conceptually on the attached workbook, particularly its Exponential and Weibull sheets. The example parameters are illustrative.</p>
+<p>Interactive Biostatistics Learning Tools · Kareem Elfass</p></div></footer>
+<script>
+(function(){
+'use strict';
+var root=document, maxT=16, palette={S:'#2468ab',F:'#bb631a',f:'#187c73',h:'#a84249',H:'#7854a2'};
+var state={k:1.8,lambda:7,t:4,lesson:0};
+function el(id){return root.getElementById(id)}
+function compact(x){if(!isFinite(x))return 'not finite';if(x===0)return '0.000';if(Math.abs(x)<.001)return x.toExponential(2);return x.toFixed(3)}
+function percent(x){return (100*x).toFixed(1)+'%'}
+function model(t){
+ var z=Math.max(0,t),r=z/state.lambda,H=Math.pow(r,state.k),S=Math.exp(-H),F=-Math.expm1(-H);
+ var h=z===0?(state.k<1?NaN:state.k===1?1/state.lambda:0):(state.k/state.lambda)*Math.pow(r,state.k-1);
+ var f=h*S;
+ return {S:S,F:F,f:f,h:h,H:H};
+}
+function updateNarrative(){
+ var m=model(state.t), trend=state.k<.999?'decreases':state.k>1.001?'increases':'stays constant';
+ el('narrative').innerHTML='At <strong>'+state.t.toFixed(1)+' months</strong>, <strong>'+percent(m.S)+'</strong> remain event-free in the model, and <strong>'+percent(m.F)+'</strong> have experienced the event. The instantaneous hazard <strong>'+trend+'</strong> with time. All five plots describe this same distribution.';
+}
+function updateMetrics(){
+ var m=model(state.t),arr=[
+ ['S','Survival',percent(m.S),'probability'],
+ ['F','Event by t',percent(m.F),'probability'],
+ ['f','PDF',compact(m.f),'/month'],
+ ['h','Hazard',compact(m.h),'/month'],
+ ['H','Cumulative hazard',compact(m.H),'integrated rate']
+ ];
+ el('metrics').innerHTML=arr.map(function(a){return '<div class="metric" style="--tone:'+palette[a[0]]+'"><div class="symbol">'+a[0]+'(t) · '+a[1]+'</div><div class="value">'+a[2]+'</div><div class="units">'+a[3]+'</div></div>'}).join('');
+}
+function sample(key,t){return model(t)[key]}
+function svgGraph(svg,key){
+ var wide=key==='H', W=wide?750:500, H=wide?230:250;
+ var l=49,r=13,top=13,bottom=34,plotW=W-l-r,plotH=H-top-bottom;
+ var start=(state.k<1&&(key==='h'||key==='f'))?.04:0;
+ var maxVal=key==='S'||key==='F'?1:0;
+ for(var j=0;j<=320;j++){var v=sample(key,start+(maxT-start)*j/320);if(isFinite(v)&&v>maxVal)maxVal=v}
+ var at=sample(key,state.t); maxVal=Math.max(maxVal,at);
+ var yMax=key==='S'||key==='F'?1:(maxVal*1.12||1);
+ var x=function(t){return l+(t/maxT)*plotW};
+ var y=function(v){return top+plotH*(1-Math.min(yMax,Math.max(0,v))/yMax)};
+ var showPercent=key==='S'||key==='F';
+ function valueText(v){return showPercent?Math.round(v*100)+'%':Number(v).toFixed(v<1?2:1)}
+ var pieces=[];
+ pieces.push('<rect x="'+l+'" y="'+top+'" width="'+plotW+'" height="'+plotH+'" fill="#fcfdff"/>');
+ for(var i=0;i<=4;i++){
+  var val=yMax*i/4, yy=y(val);
+  pieces.push('<line x1="'+l+'" y1="'+yy+'" x2="'+(W-r)+'" y2="'+yy+'" stroke="#e5eaf0"/>');
+  pieces.push('<text x="'+(l-7)+'" y="'+(yy+4)+'" text-anchor="end" font-size="11" fill="#607184">'+valueText(val)+'</text>');
+ }
+ [0,4,8,12,16].forEach(function(t){pieces.push('<text x="'+x(t)+'" y="'+(H-11)+'" text-anchor="middle" font-size="11" fill="#607184">'+t+'</text>')});
+ pieces.push('<text x="'+(W-r)+'" y="'+(H-11)+'" text-anchor="end" font-size="11" fill="#607184">months</text>');
+ var N=330,path='',shade='';
+ for(var s=0;s<=N;s++){
+  var tx=start+(maxT-start)*(s/N),v=sample(key,tx);
+  if(!isFinite(v))continue;
+  path+=(path?' L':'M')+x(tx).toFixed(2)+' '+y(v).toFixed(2);
+ }
+ if(key==='f'||key==='h'){
+  var limit=state.t, np=180;
+  shade='M'+x(0)+' '+y(0)+' L'+x(start)+' '+y(sample(key,start));
+  for(var n=1;n<=np;n++){
+   var xx=start+(limit-start)*n/np;
+   var vv=sample(key,xx);
+   if(isFinite(vv))shade+=' L'+x(xx)+' '+y(vv);
+  }
+  shade+=' L'+x(limit)+' '+y(0)+' Z';
+  pieces.push('<path d="'+shade+'" fill="'+palette[key]+'" opacity=".12" stroke="none"/>');
+ }
+ // Cumulative hazard is itself an integral. Shade under its derivative h(t), not under H(t).
+ if(key==='H'){
+  var np2=180,shadeH='M'+x(0)+' '+y(0);
+  // Keep H graph unshaded to avoid suggesting area under H equals H.
+ }
+ pieces.push('<path d="'+path+'" fill="none" stroke="'+palette[key]+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>');
+ var tx0=x(state.t),ty0=y(at);
+ pieces.push('<line x1="'+tx0+'" y1="'+top+'" x2="'+tx0+'" y2="'+(top+plotH)+'" stroke="#667e91" stroke-dasharray="4 5" stroke-width="1.4"/>');
+ pieces.push('<circle cx="'+tx0+'" cy="'+ty0+'" r="5" fill="'+palette[key]+'" stroke="#fff" stroke-width="1.6"/>');
+ var tag=showPercent?percent(at):compact(at),txLabel=Math.min(Math.max(tx0,l+35),W-r-35);
+ pieces.push('<rect x="'+(txLabel-35)+'" y="'+(top+2)+'" width="70" height="22" rx="6" fill="'+palette[key]+'"/>');
+ pieces.push('<text x="'+txLabel+'" y="'+(top+17)+'" text-anchor="middle" fill="#fff" font-size="12" font-weight="700">'+tag+'</text>');
+ svg.innerHTML=pieces.join('');
+ svg.setAttribute('aria-label',key+' versus time from 0 to 16 months, selected t '+state.t.toFixed(1)+', value '+tag+'. Click the chart to change the selected time.');
+ svg.onclick=function(ev){
+  var rect=svg.getBoundingClientRect(),fraction=(ev.clientX-rect.left)/rect.width;
+  // translate the viewBox left margin / plot width into selected time
+  var svgX=fraction*W;
+  state.t=Math.min(16,Math.max(.2,Math.round(((svgX-l)/plotW)*maxT*10)/10));
+  render();
+ };
+}
+function updateGraphs(){
+ root.querySelectorAll('svg[data-plot]').forEach(function(svg){svgGraph(svg,svg.getAttribute('data-plot'))});
+ root.querySelectorAll('.graph-card').forEach(function(card){
+  var focused=(state.lesson===0&&(card.dataset.key==='S'||card.dataset.key==='F'))||
+   (state.lesson===1&&card.dataset.key==='f')||
+   (state.lesson===2&&card.dataset.key==='h')||
+   (state.lesson===3&&card.dataset.key==='H');
+  card.classList.toggle('focus',focused);
+ });
+}
+function updateRelations(){
+ var m=model(state.t),dt=.1,incH=model(state.t+dt).H-m.H;
+ var p=1-Math.exp(-incH);
+ var rows=[
+ ['S(t) + F(t) = 1',compact(m.S)+' + '+compact(m.F)+' = '+compact(m.S+m.F),'Survival and the probability of an event by t are complementary.'],
+ ['f(t) = h(t) × S(t)',compact(m.h)+' × '+compact(m.S)+' = '+compact(m.f),'The density is the conditional rate multiplied by the fraction still event-free.'],
+ ['h(t) = f(t) / S(t)',compact(m.f)+' / '+compact(m.S)+' = '+compact(m.h),'Hazard is conditioned on remaining event-free at time t.'],
+ ['H(t) = −ln[S(t)]','−ln('+compact(m.S)+') = '+compact(m.H),'H(t) is the area under h(u) from 0 to t.'],
+ ['S(t) = exp[−H(t)]','exp(−'+compact(m.H)+') = '+compact(m.S),'Survival can be recovered from cumulative hazard.'],
+ ['P(event in next 0.1 months | event-free at t)',(100*p).toFixed(2)+'% exact ≈ '+(100*m.h*dt).toFixed(2)+'% using h(t) × 0.1','A hazard becomes an approximate short-interval risk after multiplying by a small time interval.']
+ ];
+ el('relations').innerHTML=rows.map(function(r){return '<div class="relation"><code>'+r[0]+'</code><div><strong>'+r[1]+'</strong></div><p>'+r[2]+'</p></div>'}).join('');
+}
+function updateLesson(){
+ var m=model(state.t),t=state.t.toFixed(1),horizon=.1,delta=model(state.t+horizon).H-m.H,shortRisk=1-Math.exp(-delta);
+ var info=[
+ ['Start with a survival question','Imagine '+100+' people whose event times follow this model. At month '+t+', the model estimates that <strong>'+percent(m.S)+'</strong> remain event-free. The probability an event has already occurred is <strong>'+percent(m.F)+'</strong>.<p><strong>Why?</strong> Everyone must be in one of these two groups: event by t or event after t. So S(t) + F(t) = 1.</p>'],
+ ['The PDF describes timing, not a point probability','At month '+t+', the probability density is <strong>'+compact(m.f)+' per month</strong>. That does <strong>not</strong> mean '+percent(m.f)+' will have the event exactly at month '+t+'.<p>The <strong>shaded area</strong> under the PDF from 0 to '+t+' equals F(t) = <strong>'+percent(m.F)+'</strong>. Areas, not single heights, give probabilities.</p>'],
+ ['Hazard looks only at those still event-free','At month '+t+', the PDF is '+compact(m.f)+' per month, and '+percent(m.S)+' remain event-free. Divide the first by the second:<p><strong>h(t) = f(t) / S(t) = '+compact(m.f)+' / '+compact(m.S)+' = '+compact(m.h)+' per month.</strong></p><p>For the next 0.1 months, the <em>conditional probability</em> of an event is <strong>'+(100*shortRisk).toFixed(2)+'%</strong>. Using h(t) × 0.1 gives an approximation of <strong>'+(100*m.h*horizon).toFixed(2)+'%</strong>. The rate itself is not a probability.</p>'],
+ ['Accumulating hazard over time','The cumulative hazard adds up the instantaneous hazard over time:<p><strong>H(t) = ∫₀ᵗ h(u) du = '+compact(m.H)+'</strong>.</p><p>Now transform this into survival: <strong>S(t) = exp[−'+compact(m.H)+'] = '+percent(m.S)+'</strong>.</p><p>Unlike F(t), H(t) is <em>not</em> a probability and may be greater than 1.</p>'],
+ ['Everything must agree','At month '+t+', the same model gives:<p><strong>S = '+compact(m.S)+'; F = '+compact(m.F)+'; f = '+compact(m.f)+'; h = '+compact(m.h)+'; H = '+compact(m.H)+'.</strong></p><p>Check: <strong>1 − S = '+compact(1-m.S)+' = F</strong>; <strong>h × S = '+compact(m.h*m.S)+' = f</strong>; and <strong>−ln S = '+compact(-Math.log(m.S))+' = H</strong>.</p><p>Change the shape or scale. These relationships always hold even though the individual curves change.</p>']
+ ];
+ el('lesson-body').innerHTML='<h3>'+info[state.lesson][0]+'</h3><p>'+info[state.lesson][1]+'</p>';
+ el('step-count').textContent='Lesson '+(state.lesson+1)+' of 5';
+ root.querySelectorAll('[data-lesson]').forEach(function(b){if(Number(b.dataset.lesson)===state.lesson)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+ el('lesson-prev').disabled=state.lesson===0;
+ el('lesson-next').disabled=state.lesson===4;
+ el('lesson-next').textContent=state.lesson===4?'All lessons complete ✓':'Next lesson →';
+}
+function render(){
+ el('shape-out').value=state.k.toFixed(2);
+ el('scale-out').value=state.lambda.toFixed(1)+' months';
+ el('time-out').value=state.t.toFixed(1)+' months';
+ el('shape').value=state.k;el('scale').value=state.lambda;el('time').value=state.t;
+ root.querySelectorAll('[data-shape]').forEach(function(b){b.setAttribute('aria-pressed',String(Math.abs(Number(b.dataset.shape)-state.k)<.001))});
+ updateNarrative();updateMetrics();updateGraphs();updateLesson();updateRelations();
+}
+el('shape').addEventListener('input',function(e){state.k=Number(e.target.value);render()});
+el('scale').addEventListener('input',function(e){state.lambda=Number(e.target.value);render()});
+el('time').addEventListener('input',function(e){state.t=Number(e.target.value);render()});
+root.querySelectorAll('[data-shape]').forEach(function(b){b.addEventListener('click',function(){state.k=Number(b.dataset.shape);render()})});
+el('reset').addEventListener('click',function(){state.k=1.8;state.lambda=7;state.t=4;state.lesson=0;render()});
+root.querySelectorAll('[data-lesson]').forEach(function(b){b.addEventListener('click',function(){state.lesson=Number(b.dataset.lesson);render()})});
+el('lesson-prev').addEventListener('click',function(){if(state.lesson>0){state.lesson--;render()}});
+el('lesson-next').addEventListener('click',function(){if(state.lesson<4){state.lesson++;render()}});
+render();
+})();
+</script>
+</body>
+</html>
