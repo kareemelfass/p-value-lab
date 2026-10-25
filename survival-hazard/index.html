@@ -103,7 +103,7 @@ function sample(key,t){return model(t)[key]}
 function svgGraph(svg,key){
  var wide=key==='H', W=wide?750:500, H=wide?230:250;
  var l=49,r=13,top=13,bottom=34,plotW=W-l-r,plotH=H-top-bottom;
- var start=(state.k<1&&(key==='h'||key==='f'))?.04:0;
+ var start=(state.k<1&&(key==='h'||key==='f')) ? 0.04 : 0;
  var maxVal=key==='S'||key==='F'?1:0;
  for(var j=0;j<=320;j++){var v=sample(key,start+(maxT-start)*j/320);if(isFinite(v)&&v>maxVal)maxVal=v}
  var at=sample(key,state.t); maxVal=Math.max(maxVal,at);
