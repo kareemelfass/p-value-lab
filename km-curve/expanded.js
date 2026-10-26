@@ -310,8 +310,8 @@ function drawTiming(){
     {rows:late,color:"#7456a6",events:which==="late",censors:which==="late",band:which==="late"}
   ],12,true);
   $("#timingComparison").innerHTML='<table><thead><tr><th>Scenario</th><th>Risk set at first event</th><th>First step (1 event)</th><th>KM after all 6 events</th><th>Pointwise 95% CI at final event</th></tr></thead><tbody>'+
-    '<tr><td><strong>Early events</strong></td><td>'+riskBeforeEq(ef,20)+'</td><td>'+stepEq(ef)+'</td><td>'+survivalEq(eEnd)+'</td><td>'+pct(eEnd.ci[0])+' to '+pct(eEnd.ci[1])+' (width '+width(eEnd)+')</td></tr>'+
-    '<tr><td><strong>Late events</strong></td><td>'+riskBeforeEq(lf,20)+'</td><td>'+stepEq(lf)+'</td><td>'+survivalEq(lEnd)+'</td><td>'+pct(lEnd.ci[0])+' to '+pct(lEnd.ci[1])+' (width '+width(lEnd)+')</td></tr></tbody></table>';
+    '<tr><td><strong>Early events</strong></td><td>'+riskBeforeEq(ef,20)+'</td><td>'+stepEq(ef)+'</td><td>'+survivalEq(eEnd)+'</td><td>'+ciEq(eEnd)+</td></tr>'+
+    '<tr><td><strong>Late events</strong></td><td>'+riskBeforeEq(lf,20)+'</td><td>'+stepEq(lf)+'</td><td>'+survivalEq(lEnd)+'</td><td>'+ciEq(lEnd)+</td></tr></tbody></table>';
   $("#timingNumbers").innerHTML=
     '<div class="metric"><div class="mini">Selected scenario: first event</div><div class="value">'+first.n+' at risk</div><div class="mini">Month '+first.t+'</div></div>'+
     '<div class="metric"><div class="mini">After sixth event</div><div class="value">'+pct(last.S)+'</div><div class="mini">'+pct(last.before)+' × '+pct(last.factor)+'</div></div>'+
