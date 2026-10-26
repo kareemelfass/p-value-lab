@@ -1,0 +1,51 @@
+
+/* Expanded KM teaching modules */
+:root{--teal:#157a78;--amber:#a76412;--violet:#7456a6}
+html{scroll-behavior:smooth}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #f3b63f;outline-offset:3px}
+.navlab{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0 24px}
+.navlab a{padding:7px 12px;text-decoration:none;border:1px solid var(--line);border-radius:24px;color:var(--blue);font-size:14px}
+.navlab a:hover{background:var(--blue2)}
+.section-lead{max-width:820px;color:#4b586f}
+.explainer{background:#f5f8fc;border:1px solid #d8e3f1;border-radius:12px;padding:14px;margin:12px 0}
+.key-point{border-left:4px solid var(--teal);padding:8px 12px;background:#f0f9f7;margin:12px 0}
+.warning{border-left:4px solid var(--amber);padding:8px 12px;background:#fff8ec;margin:12px 0}
+.formula-chain{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.formula-step{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;flex:1 1 165px}
+.formula-step .num{font-size:23px;font-weight:750;color:var(--blue)}
+.formula-step .mini{display:block}
+.tablewrap{padding:0;overflow:auto}
+.tablewrap table{min-width:980px;font-size:14px}
+.tablewrap th{white-space:nowrap;background:#f6f8fc;color:#3e4e6e}
+.tablewrap tr.current{outline:2px solid #668ecb;outline-offset:-2px}
+.tablewrap tr.future{opacity:.6}
+.rowbtn{padding:4px 7px;font-size:13px;border-radius:5px}
+.control-panel{display:flex;gap:16px;flex-wrap:wrap;align-items:end;margin:16px 0}
+.control-panel label{font-size:14px;font-weight:650;display:flex;flex-direction:column;gap:7px;min-width:180px;flex:1}
+.control-panel input[type=range]{width:100%;accent-color:var(--blue)}
+.control-panel select{padding:10px;border:1px solid var(--line);border-radius:9px;background:#fff;font:inherit}
+.control-panel label.checkrow{flex-direction:row;align-items:center;gap:10px}
+.output-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:10px 0}
+.metric{border:1px solid var(--line);border-radius:12px;padding:13px;background:#fafbfe}
+.metric .value{font-size:24px;font-weight:750;color:var(--blue);font-variant-numeric:tabular-nums}
+.metric .mini{font-size:12px}
+.chart-panel{background:#fff;border:1px solid var(--line);border-radius:12px;overflow-x:auto;padding:8px}
+.chart-panel svg{width:100%;min-width:560px;height:auto;display:block}
+.legend{display:flex;gap:18px;flex-wrap:wrap;font-size:13px;margin:8px 0;color:#4b586f}
+.swatch{display:inline-block;width:23px;height:6px;margin-right:5px;vertical-align:middle;border-radius:4px}
+.swatch.blue{background:var(--blue)}.swatch.teal{background:var(--teal)}.swatch.amber{background:#b87824}
+.swatch.band{height:12px;background:#d3e1f3}
+.riskstrip{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;margin:10px 0}
+.riskstrip div{text-align:center;border:1px solid var(--line);border-radius:7px;padding:4px;font-size:12px}
+.riskstrip strong{display:block;font-size:18px;color:var(--blue)}
+#stepMath{margin-top:16px}
+#riskPlot{max-height:250px}
+.inline-table{overflow-x:auto}
+.inline-table table{min-width:610px}
+.inline-table td,.inline-table th{font-size:13px;padding:7px}
+.controls-hint{font-size:13px;color:#56647a}
+.patient-legend{display:flex;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--muted);margin-top:7px}
+.patient-legend span{display:flex;align-items:center;gap:5px}
+.section-index{color:var(--teal);font-size:12px;letter-spacing:.11em;font-weight:800;text-transform:uppercase}
+@media(max-width:690px){.output-grid{grid-template-columns:1fr 1fr}.control-panel label{min-width:145px}.riskstrip{gap:3px}.riskstrip div{font-size:10px}.riskstrip strong{font-size:15px}.chart-panel{padding:0}.formula-step{flex-basis:145px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
