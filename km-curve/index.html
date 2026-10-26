@@ -28,7 +28,8 @@
 <h2>Let's do the first step together</h2>
 <div class="card"><p>At <strong>month 2</strong>, all 8 patients are still at risk and 1 patient has the event.</p><div class="flow"><div><strong>8</strong><br>at risk</div><div>→</div><div><strong>1</strong><br>event</div><div>→</div><div><strong>7/8 = 87.5%</strong><br>survive this step</div></div><p>Before month 2, survival was 100%. So:</p><div class="formula">Survival at month 2 = Previous survival × Conditional survival<br><strong>1.00 × 0.875 = <span class="big">0.875 (87.5%)</span></strong></div><p>Our KM curve therefore makes its first step down: <strong>100% → 87.5%</strong>.</p></div>
 
-<h2 id="build">1. Now build the curve</h2>
+<h2 id="build">1. Build the curve one event at a time</h2>
+<p class="lesson-goal"><strong>The message:</strong> The KM estimate is a running product. Each event adds one fraction. A censoring adds no drop.</p>
 <p>We have done month 2 together. Continue one observation time at a time. Watch the <strong>people → calculation → table → curve</strong> update together.</p>
 <div class="card">
 <div id="instruction" class="lesson"></div>
@@ -41,6 +42,17 @@
 </div>
 
 <div id="stepMath" class="card soft" aria-live="polite"></div>
+<div class="card">
+<h3>Build the survival equation as the curve grows</h3>
+<p>Begin at <strong>100%</strong>. At each event, multiply the survival you already have by <strong>(at risk − events) / at risk</strong>. Nothing is reset to 100%. The highlighted fraction is the current event.</p>
+<div id="productBuild" aria-live="polite"></div>
+<p id="productExplanation" class="mini"></p>
+<details class="symbol-note">
+<summary>What does the compact mathematical symbol ∏ mean?</summary>
+<p>It simply means <strong>multiply these fractions together</strong>. It is not a new statistical calculation.</p>
+<p><code>S(t) = ∏ (1 − dᵢ/nᵢ)</code> means: start at 1 (100%), then for each event time <em>i</em>, multiply by <code>(nᵢ − dᵢ)/nᵢ</code>. Here <code>nᵢ</code> is the number at risk just before that time and <code>dᵢ</code> is the number with the event at that time. Censor-only times multiply by 1, so we omit them from the displayed product.</p>
+</details>
+</div>
 <div class="card"><h3>Watch the curve and its uncertainty</h3>
 <p class="mini">A drop shows an event. A short vertical tick shows censoring. Shading shows the pointwise 95% confidence interval. Read the risk counts directly below the curve.</p>
 <label class="checkrow"><input id="showCI" type="checkbox" checked> Show pointwise 95% confidence interval</label>
@@ -50,66 +62,96 @@
 </div>
 
 <h2>Connect each step to the KM table</h2>
-<p>Choose a revealed time row to revisit that calculation. At-risk counts are always measured <strong>just before</strong> the indicated time. The number remaining is calculated <strong>after</strong> its events and censoring.</p>
-<div class="tablewrap card"><table><thead><tr><th>Month</th><th>At risk before (n)</th><th>Events (d)</th><th>Censored (c)</th><th>At risk after (n − d − c)</th><th>Step survival (n − d)/n</th><th>Previous KM</th><th>Updated KM</th><th>Pointwise 95% CI</th></tr></thead><tbody id="rows"></tbody></table></div>
+<p><strong>Read the arithmetic, not just the answer.</strong> Each derived cell shows the numbers that were used. Choose any revealed month to revisit the patient calculation. The risk set is counted immediately <strong>before</strong> each time; the remaining risk set is counted <strong>after</strong> its events and censorings.</p>
+<p class="controls-hint">This wide equation table scrolls horizontally on smaller screens. Select “Show substituted formula” in a confidence-interval cell to inspect the CI calculation.</p>
+<div class="tablewrap card"><table><thead><tr><th>Month</th><th>At risk before (n)</th><th>Events (d)</th><th>Censored (c)</th><th>At risk after (n − d − c)</th><th>Step survival (n − d)/n</th><th>Updated KM = previous × step</th><th>Greenwood G update</th><th>95% CI from KM and G</th></tr></thead><tbody id="rows"></tbody></table></div>
 
-<div class="card soft"><h3>The big idea</h3><p>At each <strong>event time</strong>, calculate the proportion who survived that step, then multiply it by the survival probability you had already accumulated.</p><div class="formula">S(t) = ∏ (1 − dᵢ/nᵢ)</div><p class="mini">nᵢ = number at risk immediately before the event time; dᵢ = number of events at that time.</p><p><strong>Censoring does not cause a drop.</strong> It changes who remains in the risk set for later event times.</p></div>
+<div class="card soft">
+<h3>How the 95% interval is calculated</h3>
+<p>Greenwood's G is the accumulated variance term. Start with G = 0. At an event, add <strong>events / [at risk × (at risk − events)]</strong>. At censor-only times add zero. Using the current KM survival and G, the log-minus-log method calculates a 95% pointwise interval that stays within 0% to 100%.</p>
+<p><strong>Example at month 2:</strong> G = 0 + 1/(8 × 7) = 0.01786; KM = 7/8 = 87.5%. Apply the log-minus-log transformation to give the interval <strong>38.7% to 98.1%</strong>. Expand the CI cell in the calculation table to see the exact substituted equation.</p>
+<p><strong>Remember:</strong> Censoring does not cause a vertical KM drop. It reduces the risk set used at a later event.</p>
+</div>
+
 
 
 <section id="risk">
 <div class="section-index">Experiment 2</div>
-<h2>2. A smaller risk set makes each event matter more</h2>
-<p class="section-lead">The <strong>risk set</strong> is the group still under observation and event-free immediately before a time point. Move the slider to keep the same <strong>one event</strong> but change how many people were still at risk.</p>
+<h2>2. Why a later event can be more influential when fewer people remain</h2>
+<p class="lesson-goal"><strong>The message:</strong> A subsequent event among fewer patients can produce a <strong>larger KM drop</strong> and a <strong>greater increase in uncertainty</strong>. It is the <em>next event</em>, not censoring itself, that reveals this effect.</p>
+<p class="section-lead">In both scenarios, 20 people start follow-up and the first four have events at months 1, 2, 3, and 4. Survival is therefore <strong>80%</strong> before month 8. Change how many of the remaining 16 are censored at month 6. Then watch what happens when exactly <strong>one more event</strong> occurs at month 8.</p>
 <div class="card">
-<div class="control-panel"><label for="riskN">People at risk before one event: <strong><output id="riskValue" for="riskN">8</output></strong>
-<input type="range" min="4" max="40" step="1" value="8" id="riskN"></label></div>
-<div id="riskNumbers" class="output-grid" aria-live="polite"></div>
-<div class="chart-panel"><svg id="riskPlot" viewBox="0 0 760 282" role="img" aria-label="Confidence interval comparison for one event among the selected number at risk versus 40 at risk"></svg></div>
-<div class="legend"><span><i class="swatch blue"></i>Your selected risk set</span><span><i class="swatch teal"></i>40 patients at risk</span></div>
+<div class="control-panel"><label for="riskN">People still at risk before the fifth event: <strong><output id="riskValue" for="riskN">6</output> of 16</strong>
+<input type="range" min="5" max="16" step="1" value="6" id="riskN"></label></div>
+<div id="riskFlow" aria-live="polite"></div>
+<div id="riskEquation" aria-live="polite"></div>
+<div class="legend"><span><i class="swatch blue"></i>Selected risk set, solid</span><span><i class="swatch teal"></i>No censoring before fifth event, dashed</span><span><i class="swatch band"></i>Selected pointwise 95% CI</span></div>
+<div class="chart-panel"><svg id="riskPlot" viewBox="0 0 760 340" role="img" aria-label="Kaplan Meier survival after four earlier events, with a fifth event at a chosen smaller risk set and wider confidence interval"></svg></div>
+<div id="riskNumbers" class="output-grid four" aria-live="polite"></div>
 <p class="explainer" id="riskNarrative" aria-live="polite"></p>
+<p class="controls-hint"><strong>Try:</strong> Set 16 at risk, then reduce it to 6. Focus on month 8. The previous survival is still 80%, but the fifth event causes a larger drop, a larger added Greenwood term, and a wider pointwise CI in this example.</p>
 </div>
-<p class="warning"><strong>Important nuance:</strong> Here, "less confidence" means <strong>less precision</strong>, commonly shown by a wider confidence interval. The stated confidence level remains 95%. Falling numbers at risk do not by themselves cause an immediate confidence-interval change. Greenwood's formula updates when events occur. At a later event, a smaller risk set can create a larger jump in variance. Reliability also depends on the number and timing of events and on whether censoring is non-informative.</p>
+<p class="warning"><strong>Interpretation:</strong> A 95% confidence interval keeps its stated confidence level of 95%. The concern is its <strong>precision</strong>. A smaller at-risk count does not automatically widen the CI at the censoring time. The change is expressed at later event times. The exact CI width also depends on prior survival and accumulated information.</p>
 </section>
+
+
 
 <section id="timingSection">
 <div class="section-index">Experiment 3</div>
-<h2>3. Events concentrated early versus late</h2>
-<p class="section-lead">Compare the <strong>same 20 people and the same six events</strong>, but shift when the events occur. Hold the censoring schedule fixed. This reveals why the relationship between timing and uncertainty depends on how many people are still at risk at those times.</p>
+<h2>3. Early events versus late events: why the order matters</h2>
+<p class="lesson-goal"><strong>The message:</strong> Early versus late events are not automatically more or less precise. <strong>Ask whether censoring happens before or after the events.</strong> That ordering changes the risk set and may change the resulting KM survival and its uncertainty.</p>
+<p class="section-lead">Both scenarios have exactly <strong>20 participants, 6 events, and 14 censored observations</strong>. The only difference is when the six events occur. First, keep eight people censored in months 5 and 6, and compare the two event schedules.</p>
 <div class="card">
 <div class="control-panel">
-<label for="timing">When are the six events concentrated?
-<select id="timing"><option value="early">Early: months 1 to 4</option><option value="spread">Spread: months 2 to 11</option><option value="late" selected>Late: months 7 to 11</option></select></label>
-<label class="checkrow"><input id="timingCensor" type="checkbox" checked> Keep eight early censorings (4 at month 5, 4 at month 6)</label>
+<label for="timing">Inspect the calculations for
+<select id="timing"><option value="early">Early events: months 1–4</option><option value="late" selected>Late events: months 7–11</option></select></label>
+<label class="checkrow"><input id="timingCensor" type="checkbox" checked> Censor eight people at months 5–6 (instead of censoring everyone remaining at month 12)</label>
 </div>
-<div class="legend"><span><i class="swatch blue"></i>Selected scenario, solid</span><span><i class="swatch teal"></i>Other scenarios, dashed</span><span><i class="swatch band"></i>Selected 95% pointwise CI</span></div>
-<div class="chart-panel"><svg id="timingPlot" viewBox="0 0 760 340" role="img" aria-label="Compare Kaplan Meier survival for early, spread, and late event schedules, with or without earlier censoring"></svg></div>
+<h3>Follow the order of events and censoring</h3>
+<div id="timingTimeline" aria-live="polite"></div>
+<div class="legend"><span><i class="swatch teal"></i>Early events</span><span><i class="swatch violet"></i>Late events</span><span><i class="swatch band"></i>Pointwise 95% CI for selected schedule</span></div>
+<div class="chart-panel"><svg id="timingPlot" viewBox="0 0 760 340" role="img" aria-label="Two Kaplan Meier curves: six events early versus six events late with an optional eight early censorings"></svg></div>
 <div class="output-grid" id="timingNumbers" aria-live="polite"></div>
+<h3>Compare the exact calculations</h3>
+<div id="timingComparison" class="inline-table" aria-live="polite"></div>
 <p class="explainer" id="timingCompare" aria-live="polite"></p>
-<div class="inline-table"><table aria-label="Selected event timing scenario calculations"><thead><tr><th>Month</th><th>At risk</th><th>Events</th><th>Censored</th><th>Step survival</th><th>KM survival</th><th>95% CI</th></tr></thead><tbody id="timingRows"></tbody></table></div>
+<h3>Every equation for the selected schedule</h3>
+<p class="controls-hint">The equation table scrolls horizontally. Change the selection to inspect the other event schedule.</p>
+<div class="inline-table equation-table"><table aria-label="Selected event timing scenario calculations"><thead><tr><th>Month</th><th>At risk before, calculated</th><th>Events</th><th>Censored</th><th>Risk after, calculated</th><th>Step survival equation</th><th>KM equation</th><th>Greenwood G equation</th><th>95% CI equation</th></tr></thead><tbody id="timingRows"></tbody></table></div>
 </div>
-<p class="key-point"><strong>Try this:</strong> Uncheck the early-censoring box. With no censoring before events, all six events are observed among the original 20 people. The final estimate becomes 70% in all timing scenarios, even though the curves look very different across time. The final confidence intervals are then equal too. Event timing alone does not guarantee a wider final interval.</p>
+<p class="lesson-goal"><strong>Check your understanding:</strong> Turn off the eight early censorings. All six events then occur before any censoring in both scenarios. Both finish at <strong>70% survival with the same final pointwise CI</strong>. Only the time at which the curve drops differs. This demonstrates that event timing alone is not a guarantee of lower precision.</p>
 </section>
+
+
 
 <section id="censorSection">
 <div class="section-index">Experiment 4</div>
-<h2>4. Censoring before an event, and censoring tied with an event</h2>
-<p class="section-lead">Start with <strong>12 people</strong>, one event at month 6 and another at month 9. Move patients out of follow-up at month 3 (before the event) or at month 6 (the exact same recorded time as the first event). See how those two situations behave differently.</p>
+<h2>4. Censoring before an event versus at exactly the same time</h2>
+<p class="lesson-goal"><strong>The message:</strong> Censoring <strong>before</strong> an event reduces that event's denominator. Censoring <strong>at the same recorded time</strong> does <strong>not</strong> reduce its denominator, because events are counted first. Both kinds of censoring affect the risk set for later times.</p>
+<p class="section-lead">Start with <strong>12 people</strong> and two events: one at month 6 and one at month 9. Move some censorings to month 3 and others to month 6. See exactly which denominator is affected.</p>
 <div class="card">
 <div class="control-panel">
-<label for="beforeCensor">Censored at month 3: <strong><output id="beforeValue" for="beforeCensor">4</output></strong>
+<label for="beforeCensor">Censored at month 3, <strong>before</strong> first event: <strong><output id="beforeValue" for="beforeCensor">4</output></strong>
 <input type="range" id="beforeCensor" min="0" max="5" value="4" step="1"></label>
-<label for="sameCensor">Censored at month 6 (same time as event): <strong><output id="sameValue" for="sameCensor">2</output></strong>
+<label for="sameCensor">Censored at month 6, <strong>same time</strong> as event: <strong><output id="sameValue" for="sameCensor">2</output></strong>
 <input type="range" id="sameCensor" min="0" max="4" value="2" step="1"></label>
 </div>
-<div class="legend"><span><i class="swatch blue"></i>Your censoring scenario</span><span><i class="swatch teal"></i>No early censoring, dashed</span><span><i class="swatch band"></i>Selected 95% pointwise CI</span></div>
-<div class="chart-panel"><svg id="censorPlot" viewBox="0 0 760 340" role="img" aria-label="Kaplan Meier survival with censoring before and at an event time versus no early censoring"></svg></div>
+<h3>Read the patient timeline first</h3>
+<div id="censorTimeline" aria-live="polite"></div>
+<div class="legend"><span><i class="swatch blue"></i>Your censoring scenario</span><span><i class="swatch teal"></i>No censoring before month 9, dashed</span><span><i class="swatch band"></i>Selected pointwise 95% CI</span></div>
+<div class="chart-panel"><svg id="censorPlot" viewBox="0 0 760 340" role="img" aria-label="Kaplan Meier curves illustrating censoring before versus tied with an event"></svg></div>
 <div class="output-grid" id="censorNumbers" aria-live="polite"></div>
 <div id="censorMath" aria-live="polite"></div>
 <div class="key-point" id="censorTie" aria-live="polite"></div>
-<div class="inline-table"><table aria-label="Censoring scenario KM calculations"><thead><tr><th>Month</th><th>At risk before</th><th>Events</th><th>Censored</th><th>At risk after</th><th>Step survival</th><th>KM survival</th><th>95% CI</th></tr></thead><tbody id="censorRows"></tbody></table></div>
+<div id="censorComparison" aria-live="polite"></div>
+<h3>The KM table, with every equation</h3>
+<p class="controls-hint">At a tied month, both the event and censoring appear in the same row. The denominator is the number at risk just before that month.</p>
+<div class="inline-table equation-table"><table aria-label="Censoring scenario KM calculations"><thead><tr><th>Month</th><th>At risk before, calculated</th><th>Events</th><th>Censored</th><th>Risk after, calculated</th><th>Step survival equation</th><th>KM equation</th><th>Greenwood G equation</th><th>95% CI equation</th></tr></thead><tbody id="censorRows"></tbody></table></div>
 </div>
-<div class="warning"><strong>Why events are counted first at a tie:</strong> A person censored at month 6 was known to be event-free up to that recorded time, so they belong to the month-6 risk set. Calculate survival from all people at risk at the start of that time, counting its events. Remove same-time censored people only when moving to subsequent times. These are different participants: an individual cannot be counted as both an event and censored at the same observed time. This is the usual right-censored KM convention for tied recorded times.</div>
+<p class="warning"><strong>What does a tie actually mean?</strong> Different people are observed to experience an event and censoring at the same recorded month. For conventional right-censored KM estimation, the censored people remain in that month's event-time risk set and leave afterwards. The same individual is not counted as both censored and an event.</p>
 </section>
+
+
 <section>
 <h2>What these confidence intervals do and do not mean</h2>
 <ul>
