@@ -61,6 +61,11 @@ function ciEq(r) {
   return '<span class="math-expression">CI(S='+pct(r.S)+', G='+g5(r.g)+') = <strong>'+pct(r.ci[0])+' to '+pct(r.ci[1])+'</strong></span>'+
          '<details class="ci-detail"><summary>Show substituted formula</summary><div>'+full+'</div></details>';
 }
+function fullProductEq(rows){
+  const factorRows=rows.filter(r=>r.d);
+  const factors=factorRows.map(r=>'('+r.n+' − '+r.d+')/'+r.n).join(' × ');
+  return '100% × '+factors+' = <strong>'+pct(factorRows[factorRows.length-1].S)+'</strong>';
+}
 function equationCells(r,total){
   return '<td>'+riskBeforeEq(r,total)+'</td>'+
     '<td>'+r.d+'</td><td>'+r.c+'</td>'+
@@ -297,9 +302,9 @@ function drawTiming(){
   const width=r=>pct(r.ci[1]-r.ci[0]);
   $("#timingTimeline").innerHTML='<div class="equation-comparison">'+
     '<div class="'+(which==="early"?'emphasis':'')+'"><h3>Early concentration</h3><p>20 participants → <strong>6 events in months 1–4</strong> → '+(earlyCensoring?'8 censored at months 5–6':'14 censored at month 12')+'.</p>'+
-    '<p>First event: ('+ef.n+' − 1)/'+ef.n+' = <strong>'+pct(ef.factor)+'</strong></p><p>After all events: <strong>'+pct(eEnd.S)+'</strong></p></div>'+
+    '<p>First event: ('+ef.n+' − 1)/'+ef.n+' = <strong>'+pct(ef.factor)+'</strong></p><p>Whole KM multiplication: <span class="math-expression">'+fullProductEq(early)+'</span></p></div>'+
     '<div class="'+(which==="late"?'emphasis':'')+'"><h3>Late concentration</h3><p>20 participants → '+(earlyCensoring?'8 censored at months 5–6 → ':'')+'<strong>6 events in months 7–11</strong> → '+(earlyCensoring?'6':'14')+' censored at month 12.</p>'+
-    '<p>First event: ('+lf.n+' − 1)/'+lf.n+' = <strong>'+pct(lf.factor)+'</strong></p><p>After all events: <strong>'+pct(lEnd.S)+'</strong></p></div></div>';
+    '<p>First event: ('+lf.n+' − 1)/'+lf.n+' = <strong>'+pct(lf.factor)+'</strong></p><p>Whole KM multiplication: <span class="math-expression">'+fullProductEq(late)+'</span></p></div></div>';
   plotSurvival("#timingPlot",[
     {rows:early,color:"#157a78",events:which==="early",censors:which==="early",band:which==="early"},
     {rows:late,color:"#7456a6",events:which==="late",censors:which==="late",band:which==="late"}
