@@ -319,7 +319,7 @@ function drawTiming(){
 $("#timing").addEventListener("change",drawTiming);
 $("#timingCensor").addEventListener("change",drawTiming);
 
-/* Module 4: before-time and same-time censoring. */
+/* Module 4: distinguish censoring before the event from censoring tied with it. */
 function censorRecords(before,tied){
   const obs=[{t:6,status:"event"},{t:9,status:"event"}];
   for(let i=0;i<before;i++)obs.push({t:3,status:"censor"});
@@ -334,27 +334,37 @@ function drawCensor(){
   const rows=km(censorRecords(before,tied),12);
   const baseline=km(censorRecords(0,0),12);
   const at6=rows.find(r=>r.t===6),at9=rows.find(r=>r.t===9);
+  const hypothetical=km(censorRecords(before+tied,0),12).find(r=>r.t===6);
+  const denominatorWrong=at6.n-tied;
   plotSurvival("#censorPlot",[
     {rows:baseline,color:"#157a78",dash:true},
     {rows,color:"#315c9a",band:true,censors:true,events:true}
   ],12,true);
+  $("#censorTimeline").innerHTML='<div class="story-strip">'+
+    '<div><small>Start</small><strong>12</strong><span>at risk</span></div>'+
+    '<b>→</b><div><small>Month 3: censored</small><strong>'+before+'</strong><span>leave before event</span></div>'+
+    '<b>→</b><div class="story-focus"><small>Month 6</small><strong>1 + '+tied+'</strong><span>1 event + '+tied+' censored</span></div>'+
+    '<b>→</b><div><small>Month 9</small><strong>1</strong><span>next event</span></div></div>';
   $("#censorNumbers").innerHTML=
-    '<div class="metric"><div class="mini">Risk set at month 6</div><div class="value">'+at6.n+'</div><div class="mini">12 − '+before+' earlier censorings</div></div>'+
-    '<div class="metric"><div class="mini">After the month-6 event</div><div class="value">'+pct(at6.S)+'</div><div class="mini">('+at6.n+' − 1) / '+at6.n+'</div></div>'+
-    '<div class="metric"><div class="mini">After the month-9 event</div><div class="value">'+pct(at9.S)+'</div><div class="mini">at risk at month 9: '+at9.n+'</div></div>';
-  $("#censorMath").innerHTML=
-    '<div class="formula-chain">'+
-    '<div class="formula-step"><span class="mini">1. Month 3, before the first event</span><div class="num">12 − '+before+' = '+at6.n+'</div><div class="mini">Censoring has no immediate KM drop</div></div>'+
-    '<div class="formula-step"><span class="mini">2. Month 6, event first</span><div class="num">('+at6.n+' − 1)/'+at6.n+' = '+pct(at6.S)+'</div><div class="mini">'+tied+' same-time censoring(s) still count in '+at6.n+'</div></div>'+
-    '<div class="formula-step"><span class="mini">3. After month 6</span><div class="num">'+at6.n+' − 1 − '+tied+' = '+at9.n+'</div><div class="mini">Remove the event AND same-time censorings</div></div>'+
-    '<div class="formula-step"><span class="mini">4. Month 9, next event</span><div class="num">'+pct(at6.S)+' × '+(at9.n-1)+'/'+at9.n+' = '+pct(at9.S)+'</div><div class="mini">The smaller risk set now changes the drop</div></div>'+
+    '<div class="metric"><div class="mini">Immediately before month 6</div><div class="value">'+at6.n+' at risk</div><div class="mini">12 − '+before+' = '+at6.n+'</div></div>'+
+    '<div class="metric"><div class="mini">Survival at month 6</div><div class="value">'+pct(at6.S)+'</div><div class="mini">'+stepEq(at6)+'</div></div>'+
+    '<div class="metric"><div class="mini">Survival at month 9</div><div class="value">'+pct(at9.S)+'</div><div class="mini">'+survivalEq(at9)+'</div></div>';
+  $("#censorMath").innerHTML='<h3>Follow the risk set through both event times</h3><div class="formula-chain">'+
+    '<div class="formula-step"><span class="mini">A. Censoring at month 3 occurs <strong>before</strong> event</span><div class="math-step">12 − '+before+' = <strong>'+at6.n+' at risk at month 6</strong></div><small>KM survival stays 100% at month 3.</small></div>'+
+    '<div class="formula-step emphasis"><span class="mini">B. Month 6: process <strong>event first</strong></span><div class="math-step">'+stepEq(at6)+'</div><small>'+tied+' simultaneous censoring(s) are included in the denominator.</small></div>'+
+    '<div class="formula-step"><span class="mini">C. Only <strong>after</strong> month 6, remove all exits</span><div class="math-step">'+riskAfterEq(at6)+'</div><small>People remaining for later times.</small></div>'+
+    '<div class="formula-step"><span class="mini">D. Month 9: calculate the next event</span><div class="math-step">'+survivalEq(at9)+'</div><small>'+stepEq(at9)+' based on '+at9.n+' at risk.</small></div>'+
     '</div>';
-  $("#censorTie").innerHTML=
-    '<strong>When an event and censoring share month 6:</strong> the denominator is '+at6.n+
-    ', not '+(at6.n-tied)+'. The '+tied+' same-time censored participant(s) are removed <strong>after</strong> the event-time survival fraction is calculated. '+
-    'At month 6, the pointwise 95% CI is '+pct(at6.ci[0])+' to '+pct(at6.ci[1])+
-    '. Same-time censoring does not change this CI immediately, but it changes the month-9 risk set and can affect the later estimate and CI.';
-  $("#censorRows").innerHTML=rows.map(r=>'<tr><td>'+r.t+'</td><td>'+r.n+'</td><td>'+r.d+'</td><td>'+r.c+'</td><td>'+r.after+'</td><td>'+pct(r.factor)+'</td><td>'+pct(r.S)+'</td><td>'+pct(r.ci[0])+' to '+pct(r.ci[1])+'</td></tr>').join("");
+  $("#censorTie").innerHTML=tied
+    ? '<strong>The critical tie rule:</strong> '+at6.n+' people are at risk at the beginning of month 6. One experiences the event; '+tied+' others are censored at the same month. The correct survival is <strong>'+stepEq(at6)+'</strong>. Censoring first would incorrectly use '+denominatorWrong+' in the denominator and give ('+denominatorWrong+' − 1)/'+denominatorWrong+' = '+pct((denominatorWrong-1)/denominatorWrong)+'. After the event and tied censorings, '+riskAfterEq(at6)+' people remain for month 9.'
+    : '<strong>No simultaneous censoring at present:</strong> the month-6 event uses '+at6.n+' people in its denominator. Increase the second slider to create an event and censoring at exactly the same month.';
+  $("#censorComparison").innerHTML='<h3>Does censoring at the same time as the event change its denominator?</h3>'+
+    '<div class="equation-comparison">'+
+      '<div class="emphasis"><strong>Actual: '+tied+' censored at month 6</strong><p>At risk just before month 6: <strong>'+at6.n+'</strong></p><p>First KM step: '+stepEq(at6)+'</p><p>The same-time censorings affect the next event.</p></div>'+
+      '<div><strong>Counterfactual: move those '+tied+' censorings to month 3</strong><p>At risk just before month 6: <strong>'+hypothetical.n+'</strong></p><p>First KM step: '+stepEq(hypothetical)+'</p><p>These are now censored before the event and no longer contribute to its risk set.</p></div>'+
+    '</div>'+
+    '<p class="mini">The counterfactual holds the total number of events and censorings fixed and changes only the censoring time of the '+tied+' people.</p>';
+  $("#censorRows").innerHTML=rows.map(r=>'<tr><td>'+r.t+'</td>'+equationCells(r,12)+'</tr>').join("");
 }
 $("#beforeCensor").addEventListener("input",drawCensor);
 $("#sameCensor").addEventListener("input",drawCensor);
