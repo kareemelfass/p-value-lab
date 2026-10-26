@@ -68,7 +68,7 @@
 <div class="legend"><span><i class="swatch blue"></i>Your selected risk set</span><span><i class="swatch teal"></i>40 patients at risk</span></div>
 <p class="explainer" id="riskNarrative" aria-live="polite"></p>
 </div>
-<p class="warning"><strong>Important nuance:</strong> Falling numbers at risk do not by themselves cause an immediate confidence-interval change. Greenwood's formula updates when events occur. At a later event, a smaller risk set can create a larger jump in variance. Reliability also depends on the number and timing of events and on whether censoring is non-informative.</p>
+<p class="warning"><strong>Important nuance:</strong> Here, "less confidence" means <strong>less precision</strong>, commonly shown by a wider confidence interval. The stated confidence level remains 95%. Falling numbers at risk do not by themselves cause an immediate confidence-interval change. Greenwood's formula updates when events occur. At a later event, a smaller risk set can create a larger jump in variance. Reliability also depends on the number and timing of events and on whether censoring is non-informative.</p>
 </section>
 
 <section id="timingSection">
@@ -108,7 +108,7 @@
 <div class="key-point" id="censorTie" aria-live="polite"></div>
 <div class="inline-table"><table aria-label="Censoring scenario KM calculations"><thead><tr><th>Month</th><th>At risk before</th><th>Events</th><th>Censored</th><th>At risk after</th><th>Step survival</th><th>KM survival</th><th>95% CI</th></tr></thead><tbody id="censorRows"></tbody></table></div>
 </div>
-<div class="warning"><strong>Why events are counted first at a tie:</strong> A person censored at month 6 was known to be event-free up to that recorded time, so they belong to the month-6 risk set. Calculate survival from all people at risk at the start of that time, counting its events. Remove same-time censored people only when moving to subsequent times. This is the usual right-censored KM convention for tied recorded times.</div>
+<div class="warning"><strong>Why events are counted first at a tie:</strong> A person censored at month 6 was known to be event-free up to that recorded time, so they belong to the month-6 risk set. Calculate survival from all people at risk at the start of that time, counting its events. Remove same-time censored people only when moving to subsequent times. These are different participants: an individual cannot be counted as both an event and censored at the same observed time. This is the usual right-censored KM convention for tied recorded times.</div>
 </section>
 <section>
 <h2>What these confidence intervals do and do not mean</h2>
