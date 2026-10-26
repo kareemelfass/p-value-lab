@@ -40,6 +40,51 @@ function km(observations,total) {
 const MAIN = km(PATIENTS,PATIENTS.length);
 let activeStep=0;
 
+/* Every table uses visible arithmetic. Events/censorings are observations, not computations. */
+const dp = x => (100*x).toFixed(1);
+const g5 = x => Number(x.toFixed(5)).toString();
+const formula = (expression,result) => '<span class="math-expression">'+expression+' = <strong>'+result+'</strong></span>';
+function riskBeforeEq(r,total){return formula(total+' − '+r.earlierEvents+' − '+r.earlierCensors, String(r.n))}
+function riskAfterEq(r){return formula(r.n+' − '+r.d+' − '+r.c,String(r.after))}
+function stepEq(r){return formula('('+r.n+' − '+r.d+')/'+r.n,pct(r.factor))}
+function survivalEq(r){return formula(pct(r.before)+' × '+pct(r.factor),pct(r.S))}
+function previousG(r){return r.d && r.n>r.d ? r.g-r.d/(r.n*(r.n-r.d)) : r.g}
+function varianceEq(r) {
+  if(!r.d)return formula(g5(r.g)+' + 0 (no event)',g5(r.g));
+  if(r.n===r.d)return 'Boundary: S = 0; Greenwood term undefined';
+  return formula(g5(previousG(r))+' + '+r.d+'/('+r.n+' × '+(r.n-r.d)+')',g5(r.g));
+}
+function ciEq(r) {
+  if(r.S===1)return 'S = 100%; no event yet';
+  if(r.S===0)return 'S = 0%; boundary';
+  const full='CI = exp{−exp[ln(−ln '+r.S.toFixed(4)+') ± 1.96 × √'+g5(r.g)+'/|ln '+r.S.toFixed(4)+'|]}';
+  return '<span class="math-expression">CI(S='+pct(r.S)+', G='+g5(r.g)+') = <strong>'+pct(r.ci[0])+' to '+pct(r.ci[1])+'</strong></span>'+
+         '<details class="ci-detail"><summary>Show substituted formula</summary><div>'+full+'</div></details>';
+}
+function equationCells(r,total){
+  return '<td>'+riskBeforeEq(r,total)+'</td>'+
+    '<td>'+r.d+'</td><td>'+r.c+'</td>'+
+    '<td>'+riskAfterEq(r)+'</td>'+
+    '<td>'+stepEq(r)+'</td>'+
+    '<td>'+survivalEq(r)+'</td>'+
+    '<td>'+varianceEq(r)+'</td>'+
+    '<td>'+ciEq(r)+'</td>';
+}
+function cumulativeProducts(rows,step){
+  const relevant=rows.slice(0,step+1);
+  return '<div class="product-terms">'+
+    '<span class="product-term start">100%</span>'+
+    relevant.filter(r=>r.d).map(r=>{
+      const now=r===rows[step];
+      return '<span class="product-sign">×</span><span class="product-term '+(now?'highlight':'')+'">'+
+          '<small>Month '+r.t+'</small><strong>('+r.n+' − '+r.d+')/'+r.n+'</strong>'+
+          '<small> = '+pct(r.factor)+'</small></span>';
+    }).join('')+
+    '<span class="product-sign">=</span><span class="product-result">'+pct(rows[step].S)+'</span>'+
+    '</div>';
+}
+
+
 /* SVG plots use explicit horizontal and vertical coordinates for KM steps. */
 function plotSeries(rows,attr,end,x,y) {
   let pts=[[0,1]],last=1;
@@ -110,45 +155,48 @@ function drawPatients() {
     return '<div class="p '+(now?"active ":"")+(earlier?"done":"")+'"><strong>'+p.id+'</strong><div class="sym">'+sym+'</div><div class="mini">'+label+'</div></div>';
   }).join("");
 }
-function drawMainTable() {
-  const row0='<tr><td>0</td><td>8</td><td>0</td><td>0</td><td>8</td><td>100.0%</td><td>100.0%</td><td><strong>100.0%</strong></td><td>Not needed yet</td></tr>';
+function drawMainTable(){
+  const row0='<tr><td>0</td><td>8 (enrolled)</td><td>0</td><td>0</td><td>8 − 0 − 0 = <strong>8</strong></td><td>(8 − 0)/8 = <strong>100%</strong></td><td>100% × 100% = <strong>100%</strong></td><td>G = 0</td><td>No event yet</td></tr>';
   $("#rows").innerHTML=row0+MAIN.map((r,i)=>{
     const seen=i<=activeStep;
-    const val=x=>seen?x:"?";
     const first='<td><button class="rowbtn" data-step="'+i+'" '+(!seen?'disabled':'')+' aria-label="Show month '+r.t+' calculation">'+r.t+'</button></td>';
-    return '<tr class="'+(i===activeStep?"current":i>activeStep?"future":"")+'">'+first+
-      '<td>'+val(r.n)+'</td><td>'+val(r.d)+'</td><td>'+val(r.c)+'</td><td>'+val(r.after)+'</td>'+
-      '<td>'+val(pct(r.factor))+'</td><td>'+val(pct(r.before))+'</td>'+
-      '<td><strong>'+val(pct(r.S))+'</strong></td><td>'+val(pct(r.ci[0])+" to "+pct(r.ci[1]))+'</td></tr>';
-  }).join("");
+    return '<tr class="'+(i===activeStep?'current':i>activeStep?'future':'')+'">'+first+
+      (seen?equationCells(r,8):'<td colspan="8">Continue the patient-by-patient lesson to reveal this calculation.</td>')+
+      '</tr>';
+  }).join('');
 }
-function drawMainCalc() {
+
+function drawMainCalc(){
   const r=MAIN[activeStep];
   $("#instruction").innerHTML='<span class="badge">Month '+r.t+'</span> &nbsp;'+
-    (r.d?(r.d===1?"One event occurs.":"Two events occur at exactly the same month."):"One patient is censored, with no event.");
-  const riskLine="8 - "+r.earlierEvents+" previous events - "+r.earlierCensors+" previous censorings = "+r.n;
-  const survivalLine=r.d ? "("+r.n+" - "+r.d+") / "+r.n+" = "+(r.n-r.d)+"/"+r.n+" = "+pct(r.factor)
-    : "No event: multiply by 1. Survival stays unchanged.";
-  const afterLine=r.n+" - "+r.d+" events - "+r.c+" censored = "+r.after;
+    (r.d?(r.d===1?"One event occurs.":"Two events occur at exactly the same month."):"A patient is censored, with no event.");
+  const riskLine="8 − "+r.earlierEvents+" previous events − "+r.earlierCensors+" previous censorings = "+r.n;
+  const survivalLine=r.d ? "("+r.n+" − "+r.d+")/"+r.n+" = "+(r.n-r.d)+"/"+r.n+" = "+pct(r.factor)
+    : "No event: conditional survival is 100%.";
+  const afterLine=r.n+" − "+r.d+" events − "+r.c+" censored = "+r.after;
   $("#calc").innerHTML='<div class="calcbox"><strong>Risk set just before month '+r.t+'</strong><div>'+riskLine+'</div>'+
-    '<p><strong>At month '+r.t+':</strong> '+r.d+' event(s), '+r.c+' censoring(s)</p>'+
+    '<p><strong>At this time:</strong> '+r.d+' event(s), '+r.c+' censored</p>'+
     '<div>Conditional survival: '+survivalLine+'</div>'+
-    '<p><strong>Accumulated KM:</strong> '+pct(r.before)+' × '+pct(r.factor)+' = <span class="big">'+pct(r.S)+'</span></p>'+
-    '<div class="mini">At risk immediately after this time: '+afterLine+'</div></div>';
+    '<p><strong>Overall KM:</strong> '+pct(r.before)+' × '+pct(r.factor)+' = <span class="big">'+pct(r.S)+'</span></p>'+
+    '<div class="mini">Remaining for later times: '+afterLine+'</div></div>';
   const stages=[
-    ["1. Before this time",riskLine+" people"],
-    ["2. What occurs",r.d+" event(s), "+r.c+" censoring(s)"],
-    ["3. Survive this step",r.d?(r.n-r.d)+"/"+r.n+" = "+pct(r.factor):"100% (no event)"],
-    ["4. Carry survival forward",pct(r.before)+" × "+pct(r.factor)+" = "+pct(r.S)]
+    ["1. Who could have the event?",riskLine],
+    ["2. What is observed?",r.d+" event(s), "+r.c+" censored"],
+    ["3. What fraction survives this time?",stepEq(r)],
+    ["4. Multiply by the previous KM",survivalEq(r)]
   ];
   $("#stepMath").innerHTML='<h3>The calculation, one piece at a time</h3>'+
-    '<div class="formula-chain">'+stages.map(s=>'<div class="formula-step"><span class="mini">'+s[0]+'</span><div class="num">'+s[1]+'</div></div>').join("")+'</div>'+
-    '<p class="mini">At-risk counts are measured <strong>immediately before</strong> the time point. The updated KM estimate multiplies the previous estimate by this time point’s conditional survival. At a censor-only time, multiply by 1.</p>'+
-    '<p><strong>Pointwise 95% confidence interval:</strong> '+pct(r.ci[0])+' to '+pct(r.ci[1])+'. '+
-    (r.d?"This event changes both survival and its estimated uncertainty.":"Censoring by itself has not changed the interval. Its impact can appear at subsequent events.")+'</p>';
-  $("#mainInsight").textContent=r.d ? "The current drop is "+pct(r.before-r.S)+" percentage points. It uses "+r.n+" people at risk just before this time."
-    : "No event means no KM drop and no Greenwood variance update, even though the risk set falls from "+r.n+" to "+r.after+".";
+    '<div class="formula-chain">'+stages.map(s=>'<div class="formula-step"><span class="mini">'+s[0]+'</span><div class="math-step">'+s[1]+'</div></div>').join("")+'</div>'+
+    '<p class="mini"><strong>All observations at this time:</strong> events cause a drop; censoring never causes an immediate drop. Same-time censoring stays in this event-time denominator.</p>'+
+    '<p><strong>Change in Greenwood G:</strong> '+varianceEq(r)+'. <strong>Pointwise 95% CI:</strong> '+pct(r.ci[0])+' to '+pct(r.ci[1])+'.</p>';
+  $("#productBuild").innerHTML=cumulativeProducts(MAIN,activeStep);
+  $("#productExplanation").innerHTML=r.d
+    ? 'Highlight: the new month-'+r.t+' factor is <strong>'+pct(r.factor)+'</strong>. Multiply it by the survival already accumulated (<strong>'+pct(r.before)+'</strong>), not by 100% again.'
+    : 'At month '+r.t+' there are <strong>zero events</strong>, so the multiplication has no new factor and the KM estimate stays <strong>'+pct(r.S)+'</strong>. The next event uses a smaller denominator.';
+  $("#mainInsight").textContent=r.d ? "Current KM drop = "+pct(r.before)+" × "+r.d+"/"+r.n+" = "+pct(r.before-r.S)+" percentage points. It uses "+r.n+" people at risk."
+    : "There is no event: neither the KM estimate nor Greenwood G changes now. The reduced risk set will matter at the next event.";
 }
+
 function drawMainPlot() {
   const completed=MAIN.slice(0,activeStep+1);
   plotSurvival("#chart",[{rows:completed,color:"#315c9a",band:true,censors:true,events:true,end:MAIN[activeStep].t}],10,$("#showCI").checked);
