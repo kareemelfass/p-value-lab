@@ -223,34 +223,52 @@ $("#rows").addEventListener("click",e=>{
   if(b&&!b.disabled){activeStep=Number(b.dataset.step);renderMain()}
 });
 
-/* Module 2: one event in different risk-set sizes. */
+/* Module 2: an additional event following the SAME first four events.
+   Censoring changes only the next risk-set size. */
+function riskRecords(nextN){
+  const obs=[1,2,3,4,8].map(t=>({t,status:"event"}));
+  for(let i=0;i<16-nextN;i++)obs.push({t:6,status:"censor"});
+  for(let i=0;i<nextN-1;i++)obs.push({t:10,status:"censor"});
+  return obs;
+}
 function drawRisk(){
   const n=Number($("#riskN").value);
-  const n0=40;
-  const S=(n-1)/n,g=1/(n*(n-1)),ci=confidence(S,g);
-  const S0=(n0-1)/n0,g0=1/(n0*(n0-1)),ci0=confidence(S0,g0);
+  const ref=km(riskRecords(16),20);
+  const selected=km(riskRecords(n),20);
+  const prev=selected.find(r=>r.t===4), now=selected.find(r=>r.t===8);
+  const reference=ref.find(r=>r.t===8);
+  const dG=1/(n*(n-1)),dGref=1/(16*15);
+  const width=r=>r.ci[1]-r.ci[0];
   $("#riskValue").textContent=n;
+  $("#riskFlow").innerHTML='<div class="story-strip">'+
+    '<div><small>At enrolment</small><strong>20</strong><span>people</span></div>'+
+    '<b>→</b><div><small>4 earlier events</small><strong>16</strong><span>still at risk</span></div>'+
+    '<b>→</b><div><small>Month 6: censored</small><strong>'+ (16-n)+'</strong><span>leave follow-up</span></div>'+
+    '<b>→</b><div class="story-focus"><small>At month 8</small><strong>'+n+'</strong><span>at risk, 1 event</span></div>'+
+    '</div>';
   $("#riskNumbers").innerHTML=
-    '<div class="metric"><div class="mini">Conditional survival</div><div class="value">'+pct(S)+'</div><div class="mini">('+n+' − 1) / '+n+'</div></div>'+
-    '<div class="metric"><div class="mini">KM step down</div><div class="value">'+pct(1/n)+'</div><div class="mini">1 / '+n+' at risk</div></div>'+
-    '<div class="metric"><div class="mini">Pointwise 95% CI</div><div class="value">'+pct(ci[0])+'</div><div class="mini">to '+pct(ci[1])+'</div></div>';
-  $("#riskNarrative").innerHTML='One event among <strong>'+n+'</strong> people lowers survival by <strong>'+pct(1/n)+'</strong>. The same single event among <strong>40</strong> people lowers survival by <strong>2.5%</strong>. A smaller denominator creates a larger step and a less precise estimate at that event. This is a single-event illustration, not a rule that every decrease in the risk count immediately widens a CI.';
-  const svg=$("#riskPlot"), start=77,end=730,px=v=>start+(end-start)*v;
-  let h='';
-  [0,.25,.5,.75,1].forEach(v=>{
-    h+='<line x1="'+px(v)+'" y1="34" x2="'+px(v)+'" y2="218" stroke="#e4e9f1"/>'+
-      '<text x="'+px(v)+'" y="245" fill="#56647a" text-anchor="middle" font-size="13">'+pct(v)+'</text>';
-  });
-  [{y:105,ci,S,color:"#315c9a",label:n+" at risk"},
-    {y:185,ci:ci0,S:S0,color:"#157a78",label:"40 at risk"}].forEach(r=>{
-    h+='<text x="80" y="'+(r.y-30)+'" font-size="14" fill="'+r.color+'" font-weight="700">'+r.label+'</text>'+
-      '<line x1="'+px(r.ci[0])+'" x2="'+px(r.ci[1])+'" y1="'+r.y+'" y2="'+r.y+'" stroke="'+r.color+'" stroke-width="5"/>'+
-      '<line x1="'+px(r.ci[0])+'" x2="'+px(r.ci[0])+'" y1="'+(r.y-9)+'" y2="'+(r.y+9)+'" stroke="'+r.color+'" stroke-width="2"/>'+
-      '<line x1="'+px(r.ci[1])+'" x2="'+px(r.ci[1])+'" y1="'+(r.y-9)+'" y2="'+(r.y+9)+'" stroke="'+r.color+'" stroke-width="2"/>'+
-      '<circle cx="'+px(r.S)+'" cy="'+r.y+'" r="7" fill="'+r.color+'"/>';
-  });
-  h+='<text x="390" y="270" text-anchor="middle" font-size="14" fill="#56647a">Survival probability, 95% pointwise CI</text>';
-  svg.innerHTML=h;
+    '<div class="metric"><div class="mini">Survival before the 5th event</div><div class="value">'+pct(prev.S)+'</div><div class="mini">Same in both scenarios</div></div>'+
+    '<div class="metric"><div class="mini">New absolute KM drop</div><div class="value">'+pct(prev.S-now.S)+'</div><div class="mini">'+pct(prev.S)+' × 1/'+n+'</div></div>'+
+    '<div class="metric"><div class="mini">Added Greenwood variance term</div><div class="value">'+g5(dG)+'</div><div class="mini">1/('+n+' × '+(n-1)+')</div></div>'+
+    '<div class="metric"><div class="mini">95% CI width after event</div><div class="value">'+pct(width(now))+'</div><div class="mini">'+pct(now.ci[1])+' − '+pct(now.ci[0])+'</div></div>';
+  $("#riskEquation").innerHTML=
+    '<h3>Same next event, different denominator</h3>'+
+    '<div class="equation-comparison">'+
+    '<div><strong>Reference: 16 still at risk</strong><div>'+pct(reference.before)+' × (16 − 1)/16 = <strong>'+pct(reference.S)+'</strong></div>'+
+    '<div>KM drop: '+pct(reference.before)+' × 1/16 = <strong>'+pct(reference.before-reference.S)+'</strong></div>'+
+    '<div>New G term: 1/(16 × 15) = <strong>'+g5(dGref)+'</strong></div>'+
+    '<div>95% CI: '+pct(reference.ci[0])+' to '+pct(reference.ci[1])+' (width '+pct(width(reference))+')</div></div>'+
+    '<div class="emphasis"><strong>After '+(16-n)+' censorings: '+n+' still at risk</strong>'+
+    '<div>'+pct(now.before)+' × ('+n+' − 1)/'+n+' = <strong>'+pct(now.S)+'</strong></div>'+
+    '<div>KM drop: '+pct(now.before)+' × 1/'+n+' = <strong>'+pct(now.before-now.S)+'</strong></div>'+
+    '<div>New G term: 1/('+n+' × '+(n-1)+') = <strong>'+g5(dG)+'</strong></div>'+
+    '<div>95% CI: '+pct(now.ci[0])+' to '+pct(now.ci[1])+' (width '+pct(width(now))+')</div></div>'+
+    '</div>';
+  $("#riskNarrative").innerHTML='The <strong>fifth event</strong> occurs after the same four earlier events in both scenarios. With '+n+' at risk, the event creates a <strong>'+pct(prev.S-now.S)+'</strong> percentage-point KM drop, versus <strong>'+pct(reference.before-reference.S)+'</strong> with 16 at risk. The added Greenwood term is <strong>'+g5(dG)+'</strong> versus <strong>'+g5(dGref)+'</strong>, and the resulting 95% CI is '+pct(width(now))+' points wide versus '+pct(width(reference))+' points. <strong>Smaller risk sets can make a later event more influential and the survival estimate less precise.</strong>';
+  plotSurvival("#riskPlot",[
+    {rows:ref,color:"#157a78",dash:true,events:false},
+    {rows:selected,color:"#315c9a",band:true,censors:true,events:true}
+  ],10,true);
 }
 $("#riskN").addEventListener("input",drawRisk);
 
