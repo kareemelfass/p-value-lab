@@ -49,3 +49,61 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 .section-index{color:var(--teal);font-size:12px;letter-spacing:.11em;font-weight:800;text-transform:uppercase}
 @media(max-width:690px){.output-grid{grid-template-columns:1fr 1fr}.control-panel label{min-width:145px}.riskstrip{gap:3px}.riskstrip div{font-size:10px}.riskstrip strong{font-size:15px}.chart-panel{padding:0}.formula-step{flex-basis:145px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Revision: show teaching messages before experiments and keep equations legible. */
+.lesson-goal{font-size:17px;line-height:1.65;margin:10px 0 16px;padding:9px 0;border-top:1px solid #dce3ed;border-bottom:1px solid #dce3ed}
+.lesson-goal strong{color:#1f3e67}
+.symbol-note{margin-top:18px;padding-top:13px;border-top:1px solid var(--line);font-size:15px}
+.symbol-note summary{cursor:pointer;font-weight:650;color:var(--blue)}
+.symbol-note code{font-size:15px;white-space:normal}
+.product-terms{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;padding:14px 5px}
+.product-term{border:1px solid #bfc9d9;border-radius:11px;padding:10px 12px;text-align:center;min-width:108px;background:#f6f8fc}
+.product-term small{display:block;color:#546477;font-size:11px}
+.product-term strong{display:block;font-size:18px;margin:2px 0}
+.product-term.start{font-size:22px;font-weight:750}
+.product-term.highlight{outline:3px solid #315c9a;outline-offset:1px;background:#eaf1fb}
+.product-sign{font-size:23px;font-weight:700;color:#56647a}
+.product-result{font-size:25px;font-weight:800;color:#315c9a}
+#productExplanation{font-size:15px}
+.math-step{font-size:15px;font-weight:600;line-height:1.55;margin:10px 0;overflow-wrap:anywhere}
+.math-expression{font-size:13px;line-height:1.5;display:block;white-space:normal;overflow-wrap:anywhere}
+.math-expression strong{color:#1f3e67}
+.tablewrap table,.equation-table table{min-width:1470px}
+.tablewrap td,.equation-table td{min-width:110px;max-width:280px;white-space:normal;vertical-align:middle;padding:10px 9px;text-align:left}
+.tablewrap th,.equation-table th{white-space:normal;text-align:left;min-width:105px}
+.tablewrap table th:nth-child(7),.equation-table table th:nth-child(7){min-width:170px}
+.ci-detail{margin-top:6px;font-size:12px;color:#52617a}
+.ci-detail summary{cursor:pointer;color:#28558e;text-decoration:underline;text-underline-offset:2px}
+.ci-detail div{overflow-wrap:anywhere;padding-top:5px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+.story-strip{display:flex;align-items:stretch;justify-content:space-around;flex-wrap:wrap;gap:8px;margin:16px 0 20px}
+.story-strip>div{flex:1 1 130px;background:#f6f8fc;border:1px solid #d9e0ea;padding:13px 10px;border-radius:12px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.story-strip .story-focus{background:#eaf1fb;border:2px solid #315c9a}
+.story-strip small{color:#536781;font-size:12px}
+.story-strip strong{font-size:25px;color:#244c85}
+.story-strip span{font-size:12px;color:#526179}
+.story-strip>b{align-self:center;font-size:23px;color:#667085}
+.equation-comparison{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:14px 0}
+.equation-comparison>div{padding:14px;border:1px solid #d6deeb;border-radius:12px;min-width:0;background:white}
+.equation-comparison .emphasis{border:2px solid #315c9a;background:#f6f9ff}
+.equation-comparison strong{font-weight:700}
+.equation-comparison p{margin:9px 0}
+.equation-comparison h3{margin:0 0 9px;font-size:18px}
+.equation-comparison div>div{margin:8px 0;font-size:14px}
+.swatch.violet{background:#7456a6}
+.output-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.output-grid .metric{min-width:0}
+#riskPlot{max-height:none}
+#timingComparison table{min-width:880px}
+#timingComparison td{vertical-align:top;text-align:left;font-size:13px}
+#timingComparison th{text-align:left;white-space:normal;font-size:13px}
+#riskEquation h3{margin:14px 0 4px}
+#censorMath .formula-step small{font-size:12px;color:#56647a}
+@media(max-width:730px){
+  .equation-comparison{grid-template-columns:1fr}
+  .output-grid.four{grid-template-columns:1fr 1fr}
+  .story-strip>b{display:none}
+  .story-strip>div{flex-basis:45%}
+  .product-term{min-width:100px;padding:7px}
+  .product-term strong{font-size:16px}
+}
+@media(max-width:390px){.story-strip>div{flex-basis:100%}}
