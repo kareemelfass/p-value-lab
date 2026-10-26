@@ -272,19 +272,15 @@ function drawRisk(){
 }
 $("#riskN").addEventListener("input",drawRisk);
 
-/* Module 3: event timing with the same total number of events. */
-const timingSchedules={
-  early:[1,2,2,3,3,4],
-  spread:[2,4,6,8,9,11],
-  late:[7,8,9,10,10,11]
-};
+/* Module 3: same count of events, changed order relative to early censoring. */
+const timingSchedules={early:[1,2,2,3,3,4],late:[7,8,9,10,10,11]};
 function timingRecords(which,earlyCensoring){
   const obs=timingSchedules[which].map(t=>({t,status:"event"}));
   if(earlyCensoring){
     for(let i=0;i<4;i++)obs.push({t:5,status:"censor"});
     for(let i=0;i<4;i++)obs.push({t:6,status:"censor"});
     for(let i=0;i<6;i++)obs.push({t:12,status:"censor"});
-  } else {
+  }else{
     for(let i=0;i<14;i++)obs.push({t:12,status:"censor"});
   }
   return obs;
@@ -292,27 +288,33 @@ function timingRecords(which,earlyCensoring){
 function findLastEvent(rows){return rows.filter(r=>r.d).slice(-1)[0]}
 function drawTiming(){
   const which=$("#timing").value,earlyCensoring=$("#timingCensor").checked;
-  const options=["early","spread","late"];
-  const runs={};
-  options.forEach(s=>runs[s]=km(timingRecords(s,earlyCensoring),20));
-  const colors={early:"#157a78",spread:"#b87824",late:"#7456a6"};
-  const series=options.map(s=>({rows:runs[s],color:s===which?"#315c9a":colors[s],
-    dash:s!==which,band:s===which,censors:s===which,events:s===which}));
-  plotSurvival("#timingPlot",series,12,true);
-  const rows=runs[which],end=findLastEvent(rows);
-  const earlyFinal=findLastEvent(runs.early),lateFinal=findLastEvent(runs.late);
+  const early=km(timingRecords("early",earlyCensoring),20);
+  const late=km(timingRecords("late",earlyCensoring),20);
+  const runs={early,late};
+  const rows=runs[which],first=rows.find(r=>r.d),last=findLastEvent(rows);
+  const ef=early.find(r=>r.d),lf=late.find(r=>r.d);
+  const eEnd=findLastEvent(early),lEnd=findLastEvent(late);
+  const width=r=>pct(r.ci[1]-r.ci[0]);
+  $("#timingTimeline").innerHTML='<div class="equation-comparison">'+
+    '<div class="'+(which==="early"?'emphasis':'')+'"><h3>Early concentration</h3><p>20 participants → <strong>6 events in months 1–4</strong> → '+(earlyCensoring?'8 censored at months 5–6':'14 censored at month 12')+'.</p>'+
+    '<p>First event: ('+ef.n+' − 1)/'+ef.n+' = <strong>'+pct(ef.factor)+'</strong></p><p>After all events: <strong>'+pct(eEnd.S)+'</strong></p></div>'+
+    '<div class="'+(which==="late"?'emphasis':'')+'"><h3>Late concentration</h3><p>20 participants → '+(earlyCensoring?'8 censored at months 5–6 → ':'')+'<strong>6 events in months 7–11</strong> → '+(earlyCensoring?'6':'14')+' censored at month 12.</p>'+
+    '<p>First event: ('+lf.n+' − 1)/'+lf.n+' = <strong>'+pct(lf.factor)+'</strong></p><p>After all events: <strong>'+pct(lEnd.S)+'</strong></p></div></div>';
+  plotSurvival("#timingPlot",[
+    {rows:early,color:"#157a78",events:which==="early",censors:which==="early",band:which==="early"},
+    {rows:late,color:"#7456a6",events:which==="late",censors:which==="late",band:which==="late"}
+  ],12,true);
+  $("#timingComparison").innerHTML='<table><thead><tr><th>Scenario</th><th>Risk set at first event</th><th>First step (1 event)</th><th>KM after all 6 events</th><th>Pointwise 95% CI at final event</th></tr></thead><tbody>'+
+    '<tr><td><strong>Early events</strong></td><td>'+riskBeforeEq(ef,20)+'</td><td>'+stepEq(ef)+'</td><td>'+survivalEq(eEnd)+'</td><td>'+pct(eEnd.ci[0])+' to '+pct(eEnd.ci[1])+' (width '+width(eEnd)+')</td></tr>'+
+    '<tr><td><strong>Late events</strong></td><td>'+riskBeforeEq(lf,20)+'</td><td>'+stepEq(lf)+'</td><td>'+survivalEq(lEnd)+'</td><td>'+pct(lEnd.ci[0])+' to '+pct(lEnd.ci[1])+' (width '+width(lEnd)+')</td></tr></tbody></table>';
   $("#timingNumbers").innerHTML=
-    '<div class="metric"><div class="mini">First event, patients at risk</div><div class="value">'+rows.find(r=>r.d).n+'</div><div class="mini">month '+rows.find(r=>r.d).t+'</div></div>'+
-    '<div class="metric"><div class="mini">Last event, patients at risk</div><div class="value">'+end.n+'</div><div class="mini">month '+end.t+'</div></div>'+
-    '<div class="metric"><div class="mini">Survival after last event</div><div class="value">'+pct(end.S)+'</div><div class="mini">95% CI: '+pct(end.ci[0])+' to '+pct(end.ci[1])+'</div></div>';
-  $("#timingCompare").innerHTML=
-    '<strong>Same 20 patients and 6 events.</strong> Survival after all events: early concentration <strong>'+pct(earlyFinal.S)+
-    '</strong> (95% CI '+pct(earlyFinal.ci[0])+' to '+pct(earlyFinal.ci[1])+'); late concentration <strong>'+pct(lateFinal.S)+
-    '</strong> (95% CI '+pct(lateFinal.ci[0])+' to '+pct(lateFinal.ci[1])+'). '+
-    (earlyCensoring
-      ?'Eight individuals are censored at months 5 and 6 in both scenarios. Early events occur while the risk set is still large, whereas late events occur after these censorings. This is why the final KM estimates differ despite the same six events.'
-      :'All non-event observations are censored at month 12. Here event timing changes the shape and timing of the drops, but not final survival or its CI when all six events have occurred.');
-  $("#timingRows").innerHTML=rows.map(r=>'<tr><td>'+r.t+'</td><td>'+r.n+'</td><td>'+r.d+'</td><td>'+r.c+'</td><td>'+pct(r.factor)+'</td><td><strong>'+pct(r.S)+'</strong></td><td>'+pct(r.ci[0])+' to '+pct(r.ci[1])+'</td></tr>').join("");
+    '<div class="metric"><div class="mini">Selected scenario: first event</div><div class="value">'+first.n+' at risk</div><div class="mini">Month '+first.t+'</div></div>'+
+    '<div class="metric"><div class="mini">After sixth event</div><div class="value">'+pct(last.S)+'</div><div class="mini">'+pct(last.before)+' × '+pct(last.factor)+'</div></div>'+
+    '<div class="metric"><div class="mini">Width of 95% CI</div><div class="value">'+width(last)+'</div><div class="mini">'+pct(last.ci[1])+' − '+pct(last.ci[0])+'</div></div>';
+  $("#timingCompare").innerHTML=earlyCensoring
+    ? '<strong>What explains the difference?</strong> In the early scenario, six events happen <strong>before</strong> the eight censorings. In the late scenario, the same eight patients are censored <strong>before</strong> the six events. The next event therefore has a smaller denominator (first event: '+ef.n+' versus '+lf.n+'). The final estimates are '+pct(eEnd.S)+' versus '+pct(lEnd.S)+'. Event timing matters here because it changes the ordering relative to censoring.'
+    : '<strong>What changes when you remove the eight early censorings?</strong> Both groups retain 20 participants at the first event. The six events occur at different times, so the curves fall at different months. After all six events, both reach '+pct(eEnd.S)+' with identical confidence intervals. <strong>Later events are not automatically less precise.</strong>';
+  $("#timingRows").innerHTML=rows.map(r=>'<tr><td>'+r.t+'</td>'+equationCells(r,20)+'</tr>').join('');
 }
 $("#timing").addEventListener("change",drawTiming);
 $("#timingCensor").addEventListener("change",drawTiming);
